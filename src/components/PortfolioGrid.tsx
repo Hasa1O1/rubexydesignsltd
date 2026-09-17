@@ -1,8 +1,9 @@
-import { useEffect, useState, type MouseEvent } from 'react'
-import { ChevronLeft, ChevronRight, Edit3, Save, X } from 'lucide-react'
+import { useEffect, useState, type MouseEvent, type TouchEvent } from 'react'
+import { ChevronLeft, ChevronRight, Edit3, Trash } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -78,14 +79,17 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const { isAdmin } = useAuth()
   const queryClient = useQueryClient()
   const [currentImage, setCurrentImage] = useState(0)
-  const [isEditing, setIsEditing] = useState(false)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [title, setTitle] = useState(item.title)
   const [category, setCategory] = useState(item.category)
   const [description, setDescription] = useState(item.description)
   const [client, setClient] = useState(item.client || '')
   const [imageUrl, setImageUrl] = useState(item.imageUrl ?? item.images?.[0] ?? '')
-  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadFiles, setUploadFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -95,6 +99,8 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setDescription(item.description)
     setClient(item.client || '')
     setImageUrl(item.imageUrl ?? item.images?.[0] ?? '')
+    setCurrentImage(0)
+    setIsDescriptionExpanded(false)
   }, [item])
 
   const imageSources = item.images && item.images.length > 0 ? item.images : imageUrl ? [imageUrl] : []
@@ -135,25 +141,21 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     }
 
     try {
-      let updatedImageUrl: string | undefined
+      let updatedImageUrls: string[] | undefined
 
-      if (uploadFile) {
-        const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const filePath = `portfolio/${item.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${safeName}`
-
-        const { error: uploadError } = await supabase.storage
-          .from('images')
-          .upload(filePath, uploadFile, {
+      if (uploadFiles.length > 0) {
+        updatedImageUrls = []
+        for (const uploadFile of uploadFiles) {
+          const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+          const filePath = `portfolio/${item.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${safeName}`
+          const { error: uploadError } = await supabase.storage.from('images').upload(filePath, uploadFile, {
             cacheControl: '3600',
             upsert: true,
           })
 
-        if (uploadError) {
-          throw uploadError
+          if (uploadError) throw uploadError
+          updatedImageUrls.push(supabase.storage.from('images').getPublicUrl(filePath).data.publicUrl)
         }
-
-        const { data } = supabase.storage.from('images').getPublicUrl(filePath)
-        updatedImageUrl = data.publicUrl
       }
 
       const payload: Record<string, unknown> = {
@@ -166,8 +168,9 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
         payload.category = category.trim()
       }
 
-      if (updatedImageUrl) {
-        payload.image_url = updatedImageUrl
+      if (updatedImageUrls?.length) {
+        payload.image_url = updatedImageUrls[0]
+        payload.images = updatedImageUrls
       }
 
       let updatePayload = { ...payload }
@@ -200,20 +203,22 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                 category: category.trim() || existing.category,
                 description: description.trim() || existing.description,
                 client: client.trim() || existing.client,
-                imageUrl: updatedImageUrl || existing.imageUrl,
-                images: updatedImageUrl ? [updatedImageUrl] : existing.images,
+                imageUrl: updatedImageUrls?.[0] || existing.imageUrl,
+                images: updatedImageUrls || existing.images,
               }
             : existing
         )
       )
 
-      if (updatedImageUrl) {
-        setImageUrl(updatedImageUrl)
+      await queryClient.invalidateQueries({ queryKey: ['portfolio-items'] })
+
+      if (updatedImageUrls?.length) {
+        setImageUrl(updatedImageUrls[0])
       }
 
       setSuccess('Portfolio item updated successfully.')
-      setUploadFile(null)
-      setIsEditing(false)
+      setUploadFiles([])
+      setIsEditDialogOpen(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save changes.')
     } finally {
@@ -221,10 +226,59 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     }
   }
 
+  async function handleDelete() {
+    setIsDeleting(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('portfolio_items')
+        .delete()
+        .eq('id', item.id)
+
+      if (deleteError) {
+        throw deleteError
+      }
+
+      queryClient.setQueryData<PortfolioItem[]>(['portfolio-items'], (currentData = []) =>
+        (Array.isArray(currentData) ? currentData : []).filter((existing) => existing.id !== item.id)
+      )
+
+      setSuccess('Portfolio item deleted successfully.')
+      setIsDeleteDialogOpen(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete portfolio item.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    event.currentTarget.dataset.touchStartX = String(event.touches[0]?.clientX ?? '')
+  }
+
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const startX = Number(event.currentTarget.dataset.touchStartX)
+    const endX = event.changedTouches[0]?.clientX ?? startX
+
+    if (hasMultipleImages && Math.abs(endX - startX) > 40) {
+      setCurrentImage((previous) =>
+        endX < startX
+          ? (previous + 1) % imageSources.length
+          : (previous - 1 + imageSources.length) % imageSources.length
+      )
+    }
+  }
+
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-xl group">
+    <Card className="group relative h-[min(32rem,calc(100dvh-7rem))] max-h-[calc(100dvh-7rem)] min-h-0 overflow-hidden rounded-2xl border-0 bg-black text-white transition-shadow hover:shadow-xl">
       {/* Image slider */}
-      <div className="relative aspect-video overflow-hidden bg-muted">
+      <div
+        className="absolute inset-0 overflow-hidden bg-muted"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {imageSources.map((src, index) => (
           <img
             key={`${item.id}-${index}`}
@@ -239,23 +293,148 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
         ))}
 
         {/* Overlay gradient */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
         {isAdmin && (
-          <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant={isEditing ? 'secondary' : 'outline'}
-              className="bg-white/90 text-gray-900 shadow-sm"
-              onClick={() => {
-                setIsEditing((value) => !value)
-                setError(null)
-                setSuccess(null)
-              }}
-            >
-              {isEditing ? <X className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
-            </Button>
+          <div className="pointer-events-auto absolute right-3 top-3 z-20 flex items-center gap-2">
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="bg-white/90 text-gray-900 shadow-sm"
+                aria-label={`Edit ${item.title}`}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  setError(null)
+                  setSuccess(null)
+                  setIsEditDialogOpen(true)
+                }}
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit portfolio item</DialogTitle>
+                  <DialogDescription>
+                    Update title, category, client, description, or upload a new image for <strong>{item.title}</strong>.
+                  </DialogDescription>
+                </DialogHeader>
+                <form className="grid gap-4">
+                  <div>
+                    <Label htmlFor={`edit-title-${item.id}`}>Title</Label>
+                    <Input
+                      id={`edit-title-${item.id}`}
+                      value={title}
+                      onChange={(event) => setTitle(event.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`edit-category-${item.id}`}>Category</Label>
+                    <Input
+                      id={`edit-category-${item.id}`}
+                      value={category}
+                      onChange={(event) => setCategory(event.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`edit-client-${item.id}`}>Client</Label>
+                    <Input
+                      id={`edit-client-${item.id}`}
+                      value={client}
+                      onChange={(event) => setClient(event.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`edit-description-${item.id}`}>Description</Label>
+                    <Textarea
+                      id={`edit-description-${item.id}`}
+                      value={description}
+                      onChange={(event) => setDescription(event.target.value)}
+                      rows={4}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`edit-image-${item.id}`}>Upload new image</Label>
+                    <Input
+                      id={`edit-image-${item.id}`}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(event) => setUploadFiles(Array.from(event.target.files ?? []))}
+                      className="mt-2"
+                    />
+                  </div>
+                </form>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                {success && <p className="text-sm text-success">{success}</p>}
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline" size="sm">
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? 'Saving...' : 'Save changes'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                className="bg-white/90 text-red-700 shadow-sm"
+                aria-label={`Delete ${item.title}`}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  setError(null)
+                  setSuccess(null)
+                  setIsDeleteDialogOpen(true)
+                }}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete portfolio item</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete <strong>{item.title}</strong>? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline" size="sm">
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
 
@@ -265,7 +444,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
             <button
               type="button"
               onClick={showPrevious}
-              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="pointer-events-auto absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Previous image"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -273,13 +452,17 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
             <button
               type="button"
               onClick={showNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="pointer-events-auto absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Next image"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
 
-            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1">
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-md">
+              {currentImage + 1}/{imageSources.length}
+            </span>
+
+            <div className="pointer-events-auto absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1">
               {imageSources.map((_, index) => (
                 <button
                   key={`dot-${item.id}-${index}`}
@@ -301,101 +484,34 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
         )}
       </div>
 
-      <CardHeader>
+      <div className="relative z-10 mt-auto flex h-full min-h-0 flex-col justify-end p-6 pt-32">
         <div className="flex items-center justify-between gap-4">
-          <span className="text-xs font-medium text-orange-500 uppercase tracking-wide">{item.category}</span>
-          <span className="text-xs text-muted-foreground">{item.year}</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-orange-300">{item.category}</span>
         </div>
 
-        {isEditing ? (
-          <div className="space-y-4">
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor={`title-${item.id}`}>Title</Label>
-                <Input
-                  id={`title-${item.id}`}
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor={`category-${item.id}`}>Category</Label>
-                <Input
-                  id={`category-${item.id}`}
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor={`client-${item.id}`}>Client</Label>
-                <Input
-                  id={`client-${item.id}`}
-                  value={client}
-                  onChange={(event) => setClient(event.target.value)}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor={`description-${item.id}`}>Description</Label>
-                <Textarea
-                  id={`description-${item.id}`}
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  rows={4}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor={`image-${item.id}`}>Replace image</Label>
-                <Input
-                  id={`image-${item.id}`}
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)}
-                  className="mt-2"
-                />
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 items-center">
-              <Button type="button" size="sm" variant="secondary" onClick={handleSave} disabled={isSaving}>
-                {isSaving ? <span>Saving...</span> : <span className="flex items-center gap-2"><Save className="h-4 w-4" /> Save</span>}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false)
-                  setTitle(item.title)
-                  setCategory(item.category)
-                  setDescription(item.description)
-                  setClient(item.client || '')
-                  setUploadFile(null)
-                  setError(null)
-                }}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            {success && <p className="text-sm text-success">{success}</p>}
-          </div>
-        ) : (
-          <>
-            <CardTitle className="line-clamp-1 font-brand text-lg">{item.title}</CardTitle>
-            {item.client && <CardDescription>Client: {item.client}</CardDescription>}
-          </>
-        )}
-      </CardHeader>
+        <CardHeader className="p-0 pt-2">
+          <CardTitle className="line-clamp-1 font-brand text-lg text-white">{item.title}</CardTitle>
+          {item.client && <CardDescription className="text-white/75">Client: {item.client}</CardDescription>}
+        </CardHeader>
 
-      {!isEditing && (
-        <CardContent>
-          <p className="line-clamp-2 text-sm text-muted-foreground font-brand">{item.description}</p>
+        <CardContent className="flex min-h-0 flex-col p-0 pt-3">
+          <p className={cn(
+            'text-sm font-brand text-white/90',
+            isDescriptionExpanded ? 'max-h-[min(12rem,30dvh)] overflow-y-auto pr-2' : 'line-clamp-2'
+          )}>
+            {item.description}
+          </p>
+          {item.description.length > 120 && (
+            <button
+              type="button"
+              className="mt-3 rounded-full bg-white/20 px-4 py-1 text-sm text-white backdrop-blur-md transition hover:bg-white/30"
+              onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
+            >
+              {isDescriptionExpanded ? 'See less' : 'See more'}
+            </button>
+          )}
         </CardContent>
-      )}
+      </div>
     </Card>
   )
 }

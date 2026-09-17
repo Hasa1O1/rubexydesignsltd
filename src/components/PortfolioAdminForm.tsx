@@ -14,7 +14,7 @@ export function PortfolioAdminForm() {
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [client, setClient] = useState('')
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -24,7 +24,7 @@ export function PortfolioAdminForm() {
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    setFile(event.target.files?.[0] ?? null)
+    setFiles(Array.from(event.target.files ?? []))
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -34,7 +34,7 @@ export function PortfolioAdminForm() {
 
     const form = event.currentTarget
 
-    if (!title.trim() || !file) {
+    if (!title.trim() || files.length === 0) {
       setError('Add a title and image before saving.')
       return
     }
@@ -42,25 +42,24 @@ export function PortfolioAdminForm() {
     setIsSaving(true)
 
     try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-      const filePath = `portfolio/${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${safeName}`
+      const imageUrls: string[] = []
 
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file, {
+      for (const file of files) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const filePath = `portfolio/${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${safeName}`
+        const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file, {
           cacheControl: '3600',
           upsert: true,
         })
 
-      if (uploadError) {
-        throw uploadError
+        if (uploadError) throw uploadError
+        imageUrls.push(supabase.storage.from('images').getPublicUrl(filePath).data.publicUrl)
       }
-
-      const { data } = supabase.storage.from('images').getPublicUrl(filePath)
 
       const insertPayload: Record<string, unknown> = {
         title: title.trim(),
-        image_url: data.publicUrl,
+        image_url: imageUrls[0],
+        images: imageUrls,
         description: description.trim() || null,
         client: client.trim() || null,
       }
@@ -82,6 +81,7 @@ export function PortfolioAdminForm() {
         const { data: insertData, error: insertError } = await supabase
           .from('portfolio_items')
           .insert(payload)
+          .select()
 
         if (!insertError) {
           insertedData = insertData
@@ -100,7 +100,7 @@ export function PortfolioAdminForm() {
       setCategory('')
       setDescription('')
       setClient('')
-      setFile(null)
+      setFiles([])
       form.reset()
 
       if (insertedData && Array.isArray(insertedData) && insertedData.length > 0) {
@@ -113,7 +113,7 @@ export function PortfolioAdminForm() {
             category: insertedItem.category || 'Portfolio',
             description: insertedItem.description || '',
             imageUrl: insertedItem.image_url,
-            images: insertedItem.image_url ? [insertedItem.image_url] : [],
+            images: insertedItem.images?.length ? insertedItem.images : insertedItem.image_url ? [insertedItem.image_url] : [],
             client: insertedItem.client || undefined,
             year: insertedItem.year || new Date(insertedItem.created_at).getFullYear(),
           }
@@ -169,8 +169,8 @@ export function PortfolioAdminForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="portfolio-image">Image *</Label>
-          <Input id="portfolio-image" type="file" accept="image/*" onChange={handleFileChange} required />
+          <Label htmlFor="portfolio-image">Images *</Label>
+          <Input id="portfolio-image" type="file" accept="image/*" multiple onChange={handleFileChange} required />
         </div>
         <div className="flex items-end">
           <Button type="submit" className="gap-2 w-full" disabled={isSaving}>
