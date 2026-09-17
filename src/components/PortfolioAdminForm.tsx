@@ -12,6 +12,7 @@ export function PortfolioAdminForm() {
   const { isAdmin } = useAuth()
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
+  const [year, setYear] = useState('')
   const [description, setDescription] = useState('')
   const [client, setClient] = useState('')
   const [featured, setFeatured] = useState(false)
@@ -61,6 +62,7 @@ export function PortfolioAdminForm() {
         title: title.trim(),
         image_url: imageUrls[0],
         images: imageUrls,
+        year: year.trim() ? Number(year) : null,
         description: description.trim() || null,
         client: client.trim() || null,
         featured,
@@ -100,6 +102,7 @@ export function PortfolioAdminForm() {
 
       setTitle('')
       setCategory('')
+      setYear('')
       setDescription('')
       setClient('')
       setFeatured(false)
@@ -114,12 +117,12 @@ export function PortfolioAdminForm() {
             id: insertedItem.id,
             title: insertedItem.title,
             category: insertedItem.category || 'Portfolio',
+            year: insertedItem.year ?? new Date(insertedItem.created_at).getFullYear(),
             description: insertedItem.description || '',
             featured: insertedItem.featured === true,
             imageUrl: insertedItem.image_url,
             images: insertedItem.images?.length ? insertedItem.images : insertedItem.image_url ? [insertedItem.image_url] : [],
             client: insertedItem.client || undefined,
-            year: insertedItem.year || new Date(insertedItem.created_at).getFullYear(),
           }
           return [newItem, ...existing]
         })
@@ -152,6 +155,28 @@ export function PortfolioAdminForm() {
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Project title"
             required
+          />
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="portfolio-category">Category *</Label>
+          <Input
+            id="portfolio-category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            placeholder="Branding, Printing, Photography..."
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="portfolio-year">Year</Label>
+          <Input
+            id="portfolio-year"
+            type="number"
+            min="1900"
+            max="2100"
+            value={year}
+            onChange={(event) => setYear(event.target.value)}
+            placeholder="2026"
           />
         </div>
         <div className="space-y-2 md:col-span-2">

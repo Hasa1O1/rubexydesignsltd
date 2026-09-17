@@ -84,6 +84,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [title, setTitle] = useState(item.title)
   const [category, setCategory] = useState(item.category)
+  const [year, setYear] = useState(String(item.year))
   const [description, setDescription] = useState(item.description)
   const [client, setClient] = useState(item.client || '')
   const [featured, setFeatured] = useState(item.featured)
@@ -98,6 +99,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   useEffect(() => {
     setTitle(item.title)
     setCategory(item.category)
+    setYear(String(item.year))
     setDescription(item.description)
     setClient(item.client || '')
     setFeatured(item.featured)
@@ -163,6 +165,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
 
       const payload: Record<string, unknown> = {
         title: title.trim(),
+        year: year.trim() ? Number(year) : null,
         description: description.trim() || null,
         client: client.trim() || null,
         featured,
@@ -205,6 +208,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                 ...existing,
                 title: title.trim(),
                 category: category.trim() || existing.category,
+                year: year.trim() ? Number(year) : existing.year,
                 description: description.trim() || existing.description,
                 client: client.trim() || existing.client,
                 featured,
@@ -342,6 +346,18 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                       id={`edit-category-${item.id}`}
                       value={category}
                       onChange={(event) => setCategory(event.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`edit-year-${item.id}`}>Year</Label>
+                    <Input
+                      id={`edit-year-${item.id}`}
+                      type="number"
+                      min="1900"
+                      max="2100"
+                      value={year}
+                      onChange={(event) => setYear(event.target.value)}
                       className="mt-2"
                     />
                   </div>
