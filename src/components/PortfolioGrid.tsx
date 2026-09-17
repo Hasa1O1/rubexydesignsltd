@@ -141,13 +141,6 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setCurrentImage(index)
   }
 
-  const parseMissingColumn = (message: string | undefined): string | undefined => {
-    if (!message) return undefined
-    const regex1 = /column .*?\.?"?([a-zA-Z0-9_]+)"? does not exist/i
-    const regex2 = /Could not find the '(.+?)' column/i
-    return regex1.exec(message)?.[1] ?? regex2.exec(message)?.[1]
-  }
-
   async function handleSave() {
     setIsSaving(true)
     setError(null)
@@ -193,26 +186,12 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
         payload.images = updatedImageUrls
       }
 
-      let updatePayload = { ...payload }
+      const { error: updateError } = await supabase
+        .from('portfolio_items')
+        .update(payload)
+        .eq('id', item.id)
 
-      while (true) {
-        const { error: updateError } = await supabase
-          .from('portfolio_items')
-          .update(updatePayload)
-          .eq('id', item.id)
-          .select()
-
-        if (!updateError) {
-          break
-        }
-
-        const missingColumn = parseMissingColumn(updateError.message)
-        if (!missingColumn || !(missingColumn in updatePayload)) {
-          throw updateError
-        }
-
-        delete updatePayload[missingColumn]
-      }
+      if (updateError) throw updateError
 
       queryClient.setQueryData<PortfolioItem[]>(['portfolio-items'], (currentData = []) =>
         (Array.isArray(currentData) ? currentData : []).map((existing) =>

@@ -70,33 +70,12 @@ export function PortfolioAdminForm() {
         insertPayload.category = category.trim()
       }
 
-      const parseMissingColumn = (message: string | undefined): string | undefined => {
-        if (!message) return undefined
-        const regex1 = /column .*?\.?"?([a-zA-Z0-9_]+)"? does not exist/i
-        const regex2 = /Could not find the '(.+?)' column/i
-        return regex1.exec(message)?.[1] ?? regex2.exec(message)?.[1]
-      }
+      const { data: insertedData, error: insertError } = await supabase
+        .from('portfolio_items')
+        .insert(insertPayload)
+        .select()
 
-      let payload = { ...insertPayload }
-      let insertedData: any = null
-      while (true) {
-        const { data: insertData, error: insertError } = await supabase
-          .from('portfolio_items')
-          .insert(payload)
-          .select()
-
-        if (!insertError) {
-          insertedData = insertData
-          break
-        }
-
-        const missingColumn = parseMissingColumn(insertError.message)
-        if (!missingColumn || !(missingColumn in payload)) {
-          throw insertError
-        }
-
-        delete payload[missingColumn]
-      }
+      if (insertError) throw insertError
 
       setTitle('')
       setCategory('')

@@ -27,6 +27,12 @@ alter table public.portfolio_items
 add column if not exists featured boolean not null default false;
 
 alter table public.portfolio_items
+add column if not exists images text[] not null default '{}',
+add column if not exists category text not null default 'Portfolio',
+add column if not exists description text not null default '',
+add column if not exists client text;
+
+alter table public.portfolio_items
 drop column if exists project_date,
 drop column if exists year;
 
