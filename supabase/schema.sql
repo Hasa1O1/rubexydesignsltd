@@ -26,6 +26,11 @@ create table if not exists public.portfolio_items (
 alter table public.portfolio_items
 add column if not exists featured boolean not null default false;
 
+alter table public.portfolio_items
+drop column if exists project_date,
+drop column if exists year;
+
+
 alter table public.site_content enable row level security;
 alter table public.portfolio_items enable row level security;
 

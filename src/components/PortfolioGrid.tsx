@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent, type TouchEvent } from 'react'
+import { useEffect, useRef, useState, type MouseEvent, type TouchEvent } from 'react'
 import { ChevronLeft, ChevronRight, Edit3, Trash } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -78,7 +78,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const { isAdmin } = useAuth()
   const queryClient = useQueryClient()
   const [currentImage, setCurrentImage] = useState(0)
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [isDescriptionDialogOpen, setIsDescriptionDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [title, setTitle] = useState(item.title)
   const [category, setCategory] = useState(item.category)
@@ -91,6 +91,8 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const descriptionRef = useRef<HTMLParagraphElement>(null)
+  const [isDescriptionTruncated, setIsDescriptionTruncated] = useState(false)
 
   useEffect(() => {
     setTitle(item.title)
@@ -99,8 +101,14 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setClient(item.client || '')
     setFeatured(item.featured)
     setCurrentImage(0)
-    setIsDescriptionExpanded(false)
   }, [item])
+
+  useEffect(() => {
+    const descriptionElement = descriptionRef.current
+    if (!descriptionElement) return
+
+    setIsDescriptionTruncated(descriptionElement.scrollHeight > descriptionElement.clientHeight + 1)
+  }, [item.description])
 
   const imageSources = Array.isArray(item.images) ? item.images : []
   const hasMultipleImages = imageSources.length > 1
@@ -499,23 +507,37 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
         </CardHeader>
 
         <CardContent className="flex min-h-0 flex-col p-0 pt-3">
-          <p className={cn(
-            'text-sm font-brand text-white/90',
-            isDescriptionExpanded ? 'max-h-[min(12rem,30dvh)] overflow-y-auto pr-2' : 'line-clamp-2'
-          )}>
+          <p ref={descriptionRef} className="line-clamp-2 text-sm font-brand text-white/90">
             {item.description}
           </p>
-          {item.description.length > 120 && (
+          {isDescriptionTruncated && (
             <button
               type="button"
               className="mt-3 rounded-full bg-white/20 px-4 py-1 text-sm text-white backdrop-blur-md transition hover:bg-white/30"
-              onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
+              onClick={() => setIsDescriptionDialogOpen(true)}
             >
-              {isDescriptionExpanded ? 'See less' : 'See more'}
+              See More
             </button>
           )}
         </CardContent>
       </div>
+
+      <Dialog open={isDescriptionDialogOpen} onOpenChange={setIsDescriptionDialogOpen}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>{item.title}</DialogTitle>
+            <DialogDescription>{item.category}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60dvh] overflow-y-auto whitespace-pre-wrap pr-2 text-sm text-foreground">
+            {item.description}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
