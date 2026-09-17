@@ -85,7 +85,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const [category, setCategory] = useState(item.category)
   const [description, setDescription] = useState(item.description)
   const [client, setClient] = useState(item.client || '')
-  const [imageUrl, setImageUrl] = useState(item.imageUrl ?? item.images?.[0] ?? '')
+  const [imageUrl, setImageUrl] = useState(item.imageUrl || '')
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -98,12 +98,12 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setCategory(item.category)
     setDescription(item.description)
     setClient(item.client || '')
-    setImageUrl(item.imageUrl ?? item.images?.[0] ?? '')
+    setImageUrl(item.imageUrl || '')
     setCurrentImage(0)
     setIsDescriptionExpanded(false)
   }, [item])
 
-  const imageSources = item.images && item.images.length > 0 ? item.images : imageUrl ? [imageUrl] : []
+  const imageSources = Array.isArray(item.images) && item.images.length > 0 ? item.images : imageUrl ? [imageUrl] : []
   const hasMultipleImages = imageSources.length > 1
 
   const showPrevious = (event: MouseEvent<HTMLButtonElement>) => {
@@ -204,7 +204,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                 description: description.trim() || existing.description,
                 client: client.trim() || existing.client,
                 imageUrl: updatedImageUrls?.[0] || existing.imageUrl,
-                images: updatedImageUrls || existing.images,
+                images: updatedImageUrls && updatedImageUrls.length > 0 ? updatedImageUrls : existing.images,
               }
             : existing
         )

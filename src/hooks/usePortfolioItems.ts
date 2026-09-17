@@ -45,7 +45,7 @@ export function usePortfolioItems() {
             category: 'Portfolio',
             description: item.description || 'Rubexy Designs project',
             imageUrl: item.image_url,
-            images: item.images?.length ? item.images : item.image_url ? [item.image_url] : [],
+            images: Array.isArray(item.images) && item.images.length > 0 ? item.images : [item.image_url],
             client: item.client || undefined,
             year: item.year ?? new Date(item.created_at).getFullYear(),
           }))

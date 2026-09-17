@@ -54,25 +54,40 @@ export function CompanyProfile() {
 
   const testimonials = [
     {
+      id: 'testimonial1',
       quote:
         'Rubexy Designs delivered exceptional quality on our fleet branding project. The attention to detail and professional service exceeded our expectations.',
+      quoteKey: 'companyprofile.testimonials.1.quote',
       author: 'John Mwape',
+      authorKey: 'companyprofile.testimonials.1.author',
       role: 'Operations Manager',
+      roleKey: 'companyprofile.testimonials.1.role',
       company: 'Logistics Company',
+      companyKey: 'companyprofile.testimonials.1.company',
     },
     {
+      id: 'testimonial2',
       quote:
         'The team handled our annual report with utmost professionalism. From design to print, everything was flawless. We trust Rubexy for our corporate publishing needs.',
+      quoteKey: 'companyprofile.testimonials.2.quote',
       author: 'Sarah Phiri',
+      authorKey: 'companyprofile.testimonials.2.author',
       role: 'Marketing Director',
+      roleKey: 'companyprofile.testimonials.2.role',
       company: 'Financial Services',
+      companyKey: 'companyprofile.testimonials.2.company',
     },
     {
+      id: 'testimonial3',
       quote:
         'Excellent photography and documentary production services. They captured our cancer awareness campaign beautifully and professionally.',
+      quoteKey: 'companyprofile.testimonials.3.quote',
       author: 'Dr. Grace Banda',
+      authorKey: 'companyprofile.testimonials.3.author',
       role: 'Executive Director',
+      roleKey: 'companyprofile.testimonials.3.role',
       company: 'Breakthrough Cancer Trust',
+      companyKey: 'companyprofile.testimonials.3.company',
     },
   ]
 
@@ -99,9 +114,13 @@ export function CompanyProfile() {
               
               {/* Main Title */}
               <div className="mb-8">
-                <h1 className="text-white text-4xl md:text-5xl font-bold tracking-wider">
-                  OUR COMPANY PROFILE
-                </h1>
+                <EditText
+                  contentKey="companyprofile.hero.title"
+                  fallback="OUR COMPANY PROFILE"
+                  render={(value) => (
+                    <h1 className="text-white text-4xl md:text-5xl font-bold tracking-wider">{value}</h1>
+                  )}
+                />
               </div>
 
               {/* Company Logo Area */}
@@ -118,15 +137,39 @@ export function CompanyProfile() {
 
               {/* Services */}
               <div className="mb-8">
-                <div className="flex items-center justify-center space-x-4 text-white">
-                  <span className="text-lg font-bold tracking-wider">PRINT</span>
+                <div className="flex flex-wrap items-center justify-center gap-4 text-white">
+                  <EditText
+                    contentKey="companyprofile.hero.services.print"
+                    fallback="PRINT"
+                    render={(value) => (
+                      <span className="text-lg font-bold tracking-wider">{value}</span>
+                    )}
+                  />
                   <div className="w-1 h-6 bg-orange-500"></div>
-                  <span className="text-lg font-bold tracking-wider">BRAND</span>
+                  <EditText
+                    contentKey="companyprofile.hero.services.brand"
+                    fallback="BRAND"
+                    render={(value) => (
+                      <span className="text-lg font-bold tracking-wider">{value}</span>
+                    )}
+                  />
                   <div className="w-1 h-6 bg-orange-500"></div>
-                  <span className="text-lg font-bold tracking-wider">MEDIA</span>
+                  <EditText
+                    contentKey="companyprofile.hero.services.media"
+                    fallback="MEDIA"
+                    render={(value) => (
+                      <span className="text-lg font-bold tracking-wider">{value}</span>
+                    )}
+                  />
                 </div>
-                <div className="mt-4">
-                  <span className="text-white text-xl italic font-light">Creativity Unlimited</span>
+                <div className="mt-4 relative z-20">
+                  <EditText
+                    contentKey="companyprofile.hero.tagline"
+                    fallback="Creativity Unlimited"
+                    render={(value) => (
+                      <span className="text-white text-xl italic font-light block">{value}</span>
+                    )}
+                  />
                 </div>
               </div>
 
@@ -168,9 +211,6 @@ export function CompanyProfile() {
                     </div>
                   </div>
                 </div>
-                <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-gray-600 text-white px-4 py-2 rounded-lg rotate-90 text-sm font-bold">
-                  MISSION
-                </div>
               </div>
 
               {/* Vision */}
@@ -197,9 +237,6 @@ export function CompanyProfile() {
                       />
                     </div>
                   </div>
-                </div>
-                <div className="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-gray-600 text-white px-4 py-2 rounded-lg rotate-90 text-sm font-bold">
-                  VISION
                 </div>
               </div>
             </div>
@@ -237,28 +274,171 @@ export function CompanyProfile() {
                   />
 
                   <div className="bg-orange-50 rounded-lg p-6 mb-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Our Services</h3>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <EditText
+                      contentKey="companyprofile.about.services.heading"
+                      fallback="Our Services"
+                      render={(value) => (
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">{value}</h3>
+                      )}
+                    />
+                    <div className="grid gap-4 md:grid-cols-3">
                       <div>
-                        <h4 className="font-semibold text-orange-600 mb-2">Brand & Print</h4>
+                        <EditText
+                          contentKey="companyprofile.about.services.print.title"
+                          fallback="Print"
+                          render={(value) => (
+                            <h4 className="font-semibold text-orange-600 mb-2">{value}</h4>
+                          )}
+                        />
                         <ul className="text-sm space-y-1">
-                          <li>• Books, magazines, posters, flyers</li>
-                          <li>• Certificates, business cards, letterheads</li>
-                          <li>• Corporate wear supply & branding</li>
-                          <li>• Vehicle branding & signage</li>
-                          <li>• Billboards, light boxes, pop-up banners</li>
-                          <li>• Office branding & embroidery</li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.print.item1"
+                              fallback="• Books, magazines, posters, flyers"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.print.item2"
+                              fallback="• Certificates, business cards, letterheads"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.print.item3"
+                              fallback="• Billboards, light boxes, pop-up banners"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.print.item4"
+                              fallback="• Annual reports, catalogues, and brochures"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.print.item5"
+                              fallback="• Letterheads, invoices, quotations, and forms"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.print.item6"
+                              fallback="• Technical documentation and corporate publishing"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
                         </ul>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-orange-600 mb-2">Media</h4>
+                        <EditText
+                          contentKey="companyprofile.about.services.brand.title"
+                          fallback="Brand"
+                          render={(value) => (
+                            <h4 className="font-semibold text-orange-600 mb-2">{value}</h4>
+                          )}
+                        />
                         <ul className="text-sm space-y-1">
-                          <li>• Professional photography</li>
-                          <li>• Documentary production</li>
-                          <li>• Video advertisements</li>
-                          <li>• Corporate videography</li>
-                          <li>• Event coverage</li>
-                          <li>• Product photography</li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.brand.item1"
+                              fallback="• Corporate wear supply & branding"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.brand.item2"
+                              fallback="• Vehicle branding & signage"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.brand.item3"
+                              fallback="• Office branding & embroidery"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.brand.item4"
+                              fallback="• Signage and interior branding"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.brand.item5"
+                              fallback="• Logo and identity design"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.brand.item6"
+                              fallback="• Branded merchandise and packaging"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                        </ul>
+                      </div>
+                      <div>
+                        <EditText
+                          contentKey="companyprofile.about.services.media.title"
+                          fallback="Media"
+                          render={(value) => (
+                            <h4 className="font-semibold text-orange-600 mb-2">{value}</h4>
+                          )}
+                        />
+                        <ul className="text-sm space-y-1">
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.media.item1"
+                              fallback="• Professional photography"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.media.item2"
+                              fallback="• Documentary production"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.media.item3"
+                              fallback="• Video advertisements"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.media.item4"
+                              fallback="• Corporate videography"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.media.item5"
+                              fallback="• Event coverage"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
+                          <li>
+                            <EditText
+                              contentKey="companyprofile.about.services.media.item6"
+                              fallback="• Product photography"
+                              render={(value) => <span>{value}</span>}
+                            />
+                          </li>
                         </ul>
                       </div>
                     </div>
@@ -273,9 +453,13 @@ export function CompanyProfile() {
                   />
 
                   <div className="text-center">
-                    <p className="text-orange-600 font-bold text-lg">
-                      We look forward to doing business with you.
-                    </p>
+                    <EditText
+                      contentKey="companyprofile.about.closing"
+                      fallback="We look forward to doing business with you."
+                      render={(value) => (
+                        <p className="text-orange-600 font-bold text-lg">{value}</p>
+                      )}
+                    />
                   </div>
                 </div>
               </div>
@@ -291,21 +475,30 @@ export function CompanyProfile() {
                 <CardHeader>
                   <div className="flex items-center gap-3 mb-4">
                     <Heart className="h-8 w-8 text-orange-500" />
-                    <CardTitle className="text-2xl text-gray-800">Corporate Social Responsibility</CardTitle>
+                    <EditText
+                      contentKey="companyprofile.csr.title"
+                      fallback="Corporate Social Responsibility"
+                      render={(value) => (
+                        <CardTitle className="text-2xl text-gray-800">{value}</CardTitle>
+                      )}
+                    />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 leading-relaxed mb-4">
-                    At Rubexy Designs, we believe in giving back to the community. We are proud to
-                    serve as a <strong>media partner for Breakthrough Cancer Trust</strong>, providing
-                    media services for cancer-awareness initiatives.
-                  </p>
-                  <p className="text-gray-700 leading-relaxed">
-                    Through our partnership, we use our expertise in photography, videography, and
-                    multimedia production to help raise awareness about cancer prevention, early
-                    detection, and support for those affected. This is our way of using creativity
-                    for a meaningful cause.
-                  </p>
+                  <EditText
+                    contentKey="companyprofile.csr.paragraph1"
+                    fallback="At Rubexy Designs, we believe in giving back to the community. We are proud to serve as a media partner for Breakthrough Cancer Trust, providing media services for cancer-awareness initiatives."
+                    render={(value) => (
+                      <p className="text-gray-700 leading-relaxed mb-4">{value}</p>
+                    )}
+                  />
+                  <EditText
+                    contentKey="companyprofile.csr.paragraph2"
+                    fallback="Through our partnership, we use our expertise in photography, videography, and multimedia production to help raise awareness about cancer prevention, early detection, and support for those affected. This is our way of using creativity for a meaningful cause."
+                    render={(value) => (
+                      <p className="text-gray-700 leading-relaxed">{value}</p>
+                    )}
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -316,7 +509,13 @@ export function CompanyProfile() {
         <section className="py-16 bg-gray-50" id="values">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Why Choose Rubexy Designs Limited?</h2>
+              <EditText
+                contentKey="companyprofile.values.title"
+                fallback="Why Choose Rubexy Designs Limited?"
+                render={(value) => (
+                  <h2 className="text-3xl font-bold text-gray-800 mb-4">{value}</h2>
+                )}
+              />
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
@@ -325,8 +524,18 @@ export function CompanyProfile() {
                   <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Friendly Support Staff</h3>
-                  <p className="text-gray-600">Our team is approachable and always ready to help with your project needs.</p>
+                  <EditText
+                    contentKey="companyprofile.values.card1.title"
+                    fallback="Friendly Support Staff"
+                    render={(value) => (
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
+                    )}
+                  />
+                  <EditText
+                    contentKey="companyprofile.values.card1.content"
+                    fallback="Our team is approachable and always ready to help with your project needs."
+                    render={(value) => <p className="text-gray-600">{value}</p>}
+                  />
                 </CardContent>
               </Card>
 
@@ -335,8 +544,18 @@ export function CompanyProfile() {
                   <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Award className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Highly Efficient</h3>
-                  <p className="text-gray-600">We deliver projects on time and within budget, every time.</p>
+                  <EditText
+                    contentKey="companyprofile.values.card2.title"
+                    fallback="Highly Efficient"
+                    render={(value) => (
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
+                    )}
+                  />
+                  <EditText
+                    contentKey="companyprofile.values.card2.content"
+                    fallback="We deliver projects on time and within budget, every time."
+                    render={(value) => <p className="text-gray-600">{value}</p>}
+                  />
                 </CardContent>
               </Card>
 
@@ -345,8 +564,18 @@ export function CompanyProfile() {
                   <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Target className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Client Oriented</h3>
-                  <p className="text-gray-600">Your success is our priority. We tailor solutions to your specific needs.</p>
+                  <EditText
+                    contentKey="companyprofile.values.card3.title"
+                    fallback="Client Oriented"
+                    render={(value) => (
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
+                    )}
+                  />
+                  <EditText
+                    contentKey="companyprofile.values.card3.content"
+                    fallback="Your success is our priority. We tailor solutions to your specific needs."
+                    render={(value) => <p className="text-gray-600">{value}</p>}
+                  />
                 </CardContent>
               </Card>
 
@@ -355,8 +584,18 @@ export function CompanyProfile() {
                   <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Building className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Very Professional</h3>
-                  <p className="text-gray-600">We maintain the highest standards of professionalism in all our work.</p>
+                  <EditText
+                    contentKey="companyprofile.values.card4.title"
+                    fallback="Very Professional"
+                    render={(value) => (
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
+                    )}
+                  />
+                  <EditText
+                    contentKey="companyprofile.values.card4.content"
+                    fallback="We maintain the highest standards of professionalism in all our work."
+                    render={(value) => <p className="text-gray-600">{value}</p>}
+                  />
                 </CardContent>
               </Card>
 
@@ -365,8 +604,18 @@ export function CompanyProfile() {
                   <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Award className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Great & Impeccable</h3>
-                  <p className="text-gray-600">We strive for perfection in every project we undertake.</p>
+                  <EditText
+                    contentKey="companyprofile.values.card5.title"
+                    fallback="Great & Impeccable"
+                    render={(value) => (
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
+                    )}
+                  />
+                  <EditText
+                    contentKey="companyprofile.values.card5.content"
+                    fallback="We strive for perfection in every project we undertake."
+                    render={(value) => <p className="text-gray-600">{value}</p>}
+                  />
                 </CardContent>
               </Card>
 
@@ -375,8 +624,18 @@ export function CompanyProfile() {
                   <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Heart className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Creativity Unlimited</h3>
-                  <p className="text-gray-600">Our motto drives us to push creative boundaries and deliver innovative solutions.</p>
+                  <EditText
+                    contentKey="companyprofile.values.card6.title"
+                    fallback="Creativity Unlimited"
+                    render={(value) => (
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
+                    )}
+                  />
+                  <EditText
+                    contentKey="companyprofile.values.card6.content"
+                    fallback="Our motto drives us to push creative boundaries and deliver innovative solutions."
+                    render={(value) => <p className="text-gray-600">{value}</p>}
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -387,10 +646,20 @@ export function CompanyProfile() {
         <section className="py-16 bg-white" id="compliance">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 font-brand">Compliance & Certifications</h2>
-              <p className="text-gray-600 mt-2 font-brand">
-                Fully registered and compliant with all Zambian regulatory requirements
-              </p>
+              <EditText
+                contentKey="companyprofile.compliance.title"
+                fallback="Compliance & Certifications"
+                render={(value) => (
+                  <h2 className="text-3xl font-bold text-gray-800 font-brand">{value}</h2>
+                )}
+              />
+              <EditText
+                contentKey="companyprofile.compliance.description"
+                fallback="Fully registered and compliant with all Zambian regulatory requirements"
+                render={(value) => (
+                  <p className="text-gray-600 mt-2 font-brand">{value}</p>
+                )}
+              />
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -404,18 +673,48 @@ export function CompanyProfile() {
                           <Icon className="h-6 w-6" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg font-brand">{cert.title}</CardTitle>
-                          <p className="text-sm text-gray-500 font-brand">{cert.subtitle}</p>
+                          <CardTitle className="text-lg font-brand">
+                            <EditText
+                              contentKey={`companyprofile.compliance.${cert.id}.title`}
+                              fallback={cert.title}
+                              render={(value) => <>{value}</>}
+                            />
+                          </CardTitle>
+                          <p className="text-sm text-gray-500 font-brand">
+                            <EditText
+                              contentKey={`companyprofile.compliance.${cert.id}.subtitle`}
+                              fallback={cert.subtitle}
+                              render={(value) => <>{value}</>}
+                            />
+                          </p>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0 space-y-3">
                       <div className="flex items-center justify-between text-sm font-brand">
                         <span className="text-gray-500">Status</span>
-                        <span className="font-semibold text-green-600">{cert.status}</span>
+                        <span className="font-semibold text-green-600">
+                          <EditText
+                            contentKey={`companyprofile.compliance.${cert.id}.status`}
+                            fallback={cert.status}
+                            render={(value) => <>{value}</>}
+                          />
+                        </span>
                       </div>
-                      <div className="text-sm text-gray-600 font-brand">{cert.valid}</div>
-                      <p className="text-sm text-gray-600 font-brand">{cert.description}</p>
+                      <div className="text-sm text-gray-600 font-brand">
+                        <EditText
+                          contentKey={`companyprofile.compliance.${cert.id}.valid`}
+                          fallback={cert.valid}
+                          render={(value) => <>{value}</>}
+                        />
+                      </div>
+                      <p className="text-sm text-gray-600 font-brand">
+                        <EditText
+                          contentKey={`companyprofile.compliance.${cert.id}.description`}
+                          fallback={cert.description}
+                          render={(value) => <>{value}</>}
+                        />
+                      </p>
                     </CardContent>
                   </Card>
                 )
@@ -423,10 +722,13 @@ export function CompanyProfile() {
             </div>
 
             <div className="mt-12 max-w-3xl mx-auto text-center">
-              <p className="text-sm text-gray-500 font-brand">
-                Copies of certificates can be provided to authorized parties upon request. We maintain privacy and security while remaining
-                transparent with partners and clients.
-              </p>
+              <EditText
+                contentKey="companyprofile.compliance.footer"
+                fallback="Copies of certificates can be provided to authorized parties upon request. We maintain privacy and security while remaining transparent with partners and clients."
+                render={(value) => (
+                  <p className="text-sm text-gray-500 font-brand">{value}</p>
+                )}
+              />
             </div>
           </div>
         </section>
@@ -435,27 +737,52 @@ export function CompanyProfile() {
         <section className="py-16 bg-gray-50" id="clients">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 font-brand">Clients & Partnerships</h2>
-              <p className="text-gray-600 mt-2 font-brand">
-                Trusted by leading organizations across Zambia and the region
-              </p>
+              <EditText
+                contentKey="companyprofile.clients.title"
+                fallback="Clients & Partnerships"
+                render={(value) => (
+                  <h2 className="text-3xl font-bold text-gray-800 font-brand">{value}</h2>
+                )}
+              />
+              <EditText
+                contentKey="companyprofile.clients.subtitle"
+                fallback="Trusted by leading organizations across Zambia and the region"
+                render={(value) => (
+                  <p className="text-gray-600 mt-2 font-brand">{value}</p>
+                )}
+              />
             </div>
 
             <LogoWall />
 
             <div className="mt-16 text-center max-w-3xl mx-auto">
-              <h3 className="text-2xl font-semibold text-gray-800 font-brand mb-4">Project Highlights</h3>
-              <p className="text-gray-600 font-brand">
-                We have successfully delivered fleet branding for DHL Express and continue to support Breakthrough Cancer Trust with media
-                services for cancer awareness initiatives.
-              </p>
+              <EditText
+                contentKey="companyprofile.clients.projectTitle"
+                fallback="Project Highlights"
+                render={(value) => (
+                  <h3 className="text-2xl font-semibold text-gray-800 font-brand mb-4">{value}</h3>
+                )}
+              />
+              <EditText
+                contentKey="companyprofile.clients.projectCopy"
+                fallback="We have successfully delivered fleet branding for DHL Express and continue to support Breakthrough Cancer Trust with media services for cancer awareness initiatives."
+                render={(value) => (
+                  <p className="text-gray-600 font-brand">{value}</p>
+                )}
+              />
             </div>
 
             <div className="mt-12">
-              <h3 className="text-2xl font-semibold text-gray-800 font-brand text-center mb-8">What Our Clients Say</h3>
+              <EditText
+                contentKey="companyprofile.clients.testimonials.title"
+                fallback="What Our Clients Say"
+                render={(value) => (
+                  <h3 className="text-2xl font-semibold text-gray-800 font-brand text-center mb-8">{value}</h3>
+                )}
+              />
               <div className="grid gap-6 md:grid-cols-3">
-                {testimonials.map((testimonial, index) => (
-                  <Testimonial key={index} {...testimonial} />
+                {testimonials.map((testimonial) => (
+                  <Testimonial key={testimonial.id} {...testimonial} />
                 ))}
               </div>
             </div>
