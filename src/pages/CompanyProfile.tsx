@@ -690,32 +690,6 @@ export function CompanyProfile() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0 space-y-3">
-                      <div className="flex items-center justify-between text-sm font-brand">
-                        <span className="text-gray-500">Status</span>
-                        <span className="font-semibold text-green-600">
-                          <EditText
-                            contentKey={`companyprofile.compliance.${cert.id}.status`}
-                            fallback={cert.status}
-                            render={(value) => <>{value}</>}
-                          />
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600 font-brand">
-                        <EditText
-                          contentKey={`companyprofile.compliance.${cert.id}.valid`}
-                          fallback={cert.valid}
-                          render={(value) => <>{value}</>}
-                        />
-                      </div>
-                      <p className="text-sm text-gray-600 font-brand">
-                        <EditText
-                          contentKey={`companyprofile.compliance.${cert.id}.description`}
-                          fallback={cert.description}
-                          render={(value) => <>{value}</>}
-                        />
-                      </p>
-                    </CardContent>
                   </Card>
                 )
               })}

@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
@@ -29,6 +30,16 @@ const queryClient = new QueryClient({
   },
 })
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [pathname])
+
+  return null
+}
+
 /**
  * Main App component
  * Sets up routing, global providers, and layout
@@ -38,6 +49,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="flex min-h-screen flex-col">
+          <ScrollToTop />
+
           {/* Structured data for SEO */}
           <StructuredData />
 

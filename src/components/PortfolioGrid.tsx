@@ -493,7 +493,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
               <ChevronRight className="h-5 w-5" />
             </button>
 
-            <span className="absolute bottom-3 right-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-md">
+            <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-md">
               {currentImage + 1}/{imageSources.length}
             </span>
 
