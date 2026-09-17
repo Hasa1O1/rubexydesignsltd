@@ -102,7 +102,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setIsDescriptionExpanded(false)
   }, [item])
 
-  const imageSources = item.images
+  const imageSources = Array.isArray(item.images) ? item.images : []
   const hasMultipleImages = imageSources.length > 1
 
   const showPrevious = (event: MouseEvent<HTMLButtonElement>) => {

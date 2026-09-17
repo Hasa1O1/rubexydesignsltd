@@ -113,11 +113,11 @@ export function PortfolioAdminForm() {
           const newItem = {
             id: insertedItem.id,
             title: insertedItem.title,
-            category: insertedItem.category,
-            description: insertedItem.description,
-            featured: insertedItem.featured === true,
-            images: insertedItem.images,
-            client: insertedItem.client,
+            category: category.trim(),
+            description: description.trim(),
+            featured,
+            images: imageUrls,
+            client: client.trim() || undefined,
           }
           return [newItem, ...existing]
         })

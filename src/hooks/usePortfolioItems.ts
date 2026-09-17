@@ -46,7 +46,7 @@ export function usePortfolioItems() {
             category: item.category ?? '',
             description: item.description ?? '',
             featured: item.featured === true,
-            images: item.images,
+            images: Array.isArray(item.images) ? item.images : [],
             client: item.client ?? undefined,
           }))
         }
