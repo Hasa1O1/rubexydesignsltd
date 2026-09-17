@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type TouchEvent } from 'react'
-import { ChevronLeft, ChevronRight, Edit3, Trash } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Edit3, Trash, X } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -85,6 +85,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const [description, setDescription] = useState(item.description)
   const [client, setClient] = useState(item.client || '')
   const [featured, setFeatured] = useState(item.featured)
+  const [editableImages, setEditableImages] = useState<string[]>(item.images)
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -100,6 +101,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setDescription(item.description)
     setClient(item.client || '')
     setFeatured(item.featured)
+    setEditableImages(item.images)
     setCurrentImage(0)
   }, [item])
 
@@ -153,10 +155,9 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     }
 
     try {
-      let updatedImageUrls: string[] | undefined
+      let uploadedImageUrls: string[] = []
 
       if (uploadFiles.length > 0) {
-        updatedImageUrls = []
         for (const uploadFile of uploadFiles) {
           const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
           const filePath = `portfolio/${item.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${safeName}`
@@ -166,24 +167,23 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
           })
 
           if (uploadError) throw uploadError
-          updatedImageUrls.push(supabase.storage.from('images').getPublicUrl(filePath).data.publicUrl)
+          uploadedImageUrls.push(supabase.storage.from('images').getPublicUrl(filePath).data.publicUrl)
         }
       }
+
+      const updatedImageUrls = [...editableImages, ...uploadedImageUrls]
 
       const payload: Record<string, unknown> = {
         title: title.trim(),
         description: description.trim() || null,
         client: client.trim() || null,
         featured,
+        image_url: updatedImageUrls[0] ?? '',
+        images: updatedImageUrls,
       }
 
       if (category.trim()) {
         payload.category = category.trim()
-      }
-
-      if (updatedImageUrls?.length) {
-        payload.image_url = updatedImageUrls[0]
-        payload.images = updatedImageUrls
       }
 
       const { error: updateError } = await supabase
@@ -203,7 +203,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                 description: description.trim(),
                 client: client.trim() || undefined,
                 featured,
-                images: updatedImageUrls ?? existing.images,
+                images: updatedImageUrls,
               }
             : existing
         )
@@ -213,6 +213,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
 
       setSuccess('Portfolio item updated successfully.')
       setUploadFiles([])
+      setEditableImages(updatedImageUrls)
       setIsEditDialogOpen(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save changes.')
@@ -292,7 +293,16 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
 
         {isAdmin && (
           <div className="pointer-events-auto absolute right-3 top-3 z-20 flex items-center gap-2">
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <Dialog
+              open={isEditDialogOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  setEditableImages(item.images)
+                  setUploadFiles([])
+                }
+                setIsEditDialogOpen(open)
+              }}
+            >
               <Button
                 type="button"
                 size="sm"
@@ -353,6 +363,28 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                       rows={4}
                       className="mt-2"
                     />
+                  </div>
+                  <div>
+                    <Label>Attached images</Label>
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {editableImages.map((imageUrl, index) => (
+                        <div key={`${item.id}-edit-image-${index}`} className="relative aspect-square overflow-hidden rounded-md border bg-muted">
+                          <img
+                            src={imageUrl}
+                            alt={`${item.title} attached image ${index + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white hover:bg-black"
+                            aria-label={`Remove attached image ${index + 1}`}
+                            onClick={() => setEditableImages((images) => images.filter((_, imageIndex) => imageIndex !== index))}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor={`edit-image-${item.id}`}>Upload new image</Label>
