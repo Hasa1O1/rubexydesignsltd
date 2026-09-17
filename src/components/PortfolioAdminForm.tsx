@@ -14,6 +14,7 @@ export function PortfolioAdminForm() {
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [client, setClient] = useState('')
+  const [featured, setFeatured] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -62,6 +63,7 @@ export function PortfolioAdminForm() {
         images: imageUrls,
         description: description.trim() || null,
         client: client.trim() || null,
+        featured,
       }
 
       if (category.trim()) {
@@ -100,6 +102,7 @@ export function PortfolioAdminForm() {
       setCategory('')
       setDescription('')
       setClient('')
+      setFeatured(false)
       setFiles([])
       form.reset()
 
@@ -112,6 +115,7 @@ export function PortfolioAdminForm() {
             title: insertedItem.title,
             category: insertedItem.category || 'Portfolio',
             description: insertedItem.description || '',
+            featured: insertedItem.featured === true,
             imageUrl: insertedItem.image_url,
             images: insertedItem.images?.length ? insertedItem.images : insertedItem.image_url ? [insertedItem.image_url] : [],
             client: insertedItem.client || undefined,
@@ -187,6 +191,14 @@ export function PortfolioAdminForm() {
             )}
           </Button>
         </div>
+        <label className="flex items-center gap-2 text-sm md:col-span-2">
+          <input
+            type="checkbox"
+            checked={featured}
+            onChange={(event) => setFeatured(event.target.checked)}
+          />
+          Display in Featured Work on the home page
+        </label>
       </div>
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
       {successMessage && <p className="mt-3 text-sm text-emerald-600">{successMessage}</p>}

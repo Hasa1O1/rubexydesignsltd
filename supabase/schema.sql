@@ -18,9 +18,13 @@ create table if not exists public.portfolio_items (
   description text not null default '',
   client text,
   year integer,
+  featured boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.portfolio_items
+add column if not exists featured boolean not null default false;
 
 alter table public.site_content enable row level security;
 alter table public.portfolio_items enable row level security;

@@ -16,6 +16,7 @@ export interface PortfolioItem {
   title: string
   category: string
   description: string
+  featured: boolean
   imageUrl?: string
   images?: string[]
   client?: string
@@ -85,6 +86,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const [category, setCategory] = useState(item.category)
   const [description, setDescription] = useState(item.description)
   const [client, setClient] = useState(item.client || '')
+  const [featured, setFeatured] = useState(item.featured)
   const [imageUrl, setImageUrl] = useState(item.imageUrl || '')
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
@@ -98,6 +100,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setCategory(item.category)
     setDescription(item.description)
     setClient(item.client || '')
+    setFeatured(item.featured)
     setImageUrl(item.imageUrl || '')
     setCurrentImage(0)
     setIsDescriptionExpanded(false)
@@ -162,6 +165,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
         title: title.trim(),
         description: description.trim() || null,
         client: client.trim() || null,
+        featured,
       }
 
       if (category.trim()) {
@@ -203,6 +207,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                 category: category.trim() || existing.category,
                 description: description.trim() || existing.description,
                 client: client.trim() || existing.client,
+                featured,
                 imageUrl: updatedImageUrls?.[0] || existing.imageUrl,
                 images: updatedImageUrls && updatedImageUrls.length > 0 ? updatedImageUrls : existing.images,
               }
@@ -370,6 +375,14 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                       className="mt-2"
                     />
                   </div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={featured}
+                      onChange={(event) => setFeatured(event.target.checked)}
+                    />
+                    Display in Featured Work on the home page
+                  </label>
                 </form>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 {success && <p className="text-sm text-success">{success}</p>}

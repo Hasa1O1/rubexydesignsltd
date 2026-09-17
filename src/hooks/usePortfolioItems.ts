@@ -10,6 +10,7 @@ interface PortfolioItemRow {
   description?: string | null
   client?: string | null
   year?: number | null
+  featured?: boolean | null
   created_at: string
 }
 
@@ -25,7 +26,7 @@ export function usePortfolioItems() {
   return useQuery({
     queryKey: ['portfolio-items'],
     queryFn: async () => {
-      const columns = ['id', 'title', 'image_url', 'images', 'description', 'client', 'year', 'created_at']
+      const columns = ['id', 'title', 'image_url', 'images', 'description', 'client', 'year', 'featured', 'created_at']
       let selectedColumns = [...columns]
       let lastError: Error | null = null
 
@@ -44,6 +45,7 @@ export function usePortfolioItems() {
             title: item.title,
             category: 'Portfolio',
             description: item.description || 'Rubexy Designs project',
+            featured: item.featured === true,
             imageUrl: item.image_url,
             images: Array.isArray(item.images) && item.images.length > 0 ? item.images : [item.image_url],
             client: item.client || undefined,
