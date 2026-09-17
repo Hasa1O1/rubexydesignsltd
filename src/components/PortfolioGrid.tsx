@@ -17,10 +17,8 @@ export interface PortfolioItem {
   category: string
   description: string
   featured: boolean
-  imageUrl?: string
-  images?: string[]
+  images: string[]
   client?: string
-  year: number
 }
 
 interface PortfolioGridProps {
@@ -84,11 +82,9 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [title, setTitle] = useState(item.title)
   const [category, setCategory] = useState(item.category)
-  const [year, setYear] = useState(String(item.year))
   const [description, setDescription] = useState(item.description)
   const [client, setClient] = useState(item.client || '')
   const [featured, setFeatured] = useState(item.featured)
-  const [imageUrl, setImageUrl] = useState(item.imageUrl || '')
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -99,16 +95,14 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   useEffect(() => {
     setTitle(item.title)
     setCategory(item.category)
-    setYear(String(item.year))
     setDescription(item.description)
     setClient(item.client || '')
     setFeatured(item.featured)
-    setImageUrl(item.imageUrl || '')
     setCurrentImage(0)
     setIsDescriptionExpanded(false)
   }, [item])
 
-  const imageSources = Array.isArray(item.images) && item.images.length > 0 ? item.images : imageUrl ? [imageUrl] : []
+  const imageSources = item.images
   const hasMultipleImages = imageSources.length > 1
 
   const showPrevious = (event: MouseEvent<HTMLButtonElement>) => {
@@ -165,7 +159,6 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
 
       const payload: Record<string, unknown> = {
         title: title.trim(),
-        year: year.trim() ? Number(year) : null,
         description: description.trim() || null,
         client: client.trim() || null,
         featured,
@@ -207,23 +200,17 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
             ? {
                 ...existing,
                 title: title.trim(),
-                category: category.trim() || existing.category,
-                year: year.trim() ? Number(year) : existing.year,
-                description: description.trim() || existing.description,
-                client: client.trim() || existing.client,
+                category: category.trim(),
+                description: description.trim(),
+                client: client.trim() || undefined,
                 featured,
-                imageUrl: updatedImageUrls?.[0] || existing.imageUrl,
-                images: updatedImageUrls && updatedImageUrls.length > 0 ? updatedImageUrls : existing.images,
+                images: updatedImageUrls ?? existing.images,
               }
             : existing
         )
       )
 
       await queryClient.invalidateQueries({ queryKey: ['portfolio-items'] })
-
-      if (updatedImageUrls?.length) {
-        setImageUrl(updatedImageUrls[0])
-      }
 
       setSuccess('Portfolio item updated successfully.')
       setUploadFiles([])
@@ -346,18 +333,6 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
                       id={`edit-category-${item.id}`}
                       value={category}
                       onChange={(event) => setCategory(event.target.value)}
-                      className="mt-2"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`edit-year-${item.id}`}>Year</Label>
-                    <Input
-                      id={`edit-year-${item.id}`}
-                      type="number"
-                      min="1900"
-                      max="2100"
-                      value={year}
-                      onChange={(event) => setYear(event.target.value)}
                       className="mt-2"
                     />
                   </div>
