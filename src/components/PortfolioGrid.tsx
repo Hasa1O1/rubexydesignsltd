@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent, type TouchEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type TouchEvent } from 'react'
 import { ChevronLeft, ChevronRight, Edit3, Trash } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -103,11 +103,23 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
     setCurrentImage(0)
   }, [item])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const descriptionElement = descriptionRef.current
     if (!descriptionElement) return
 
-    setIsDescriptionTruncated(descriptionElement.scrollHeight > descriptionElement.clientHeight + 1)
+    const updateTruncation = () => {
+      setIsDescriptionTruncated(descriptionElement.scrollHeight > descriptionElement.clientHeight + 1)
+    }
+
+    updateTruncation()
+    const resizeObserver = new ResizeObserver(updateTruncation)
+    resizeObserver.observe(descriptionElement)
+    window.addEventListener('resize', updateTruncation)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateTruncation)
+    }
   }, [item.description])
 
   const imageSources = Array.isArray(item.images) ? item.images : []
@@ -528,7 +540,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
             <DialogTitle>{item.title}</DialogTitle>
             <DialogDescription>{item.category}</DialogDescription>
           </DialogHeader>
-          <div className="max-h-[60dvh] overflow-y-auto whitespace-pre-wrap pr-2 text-sm text-foreground">
+          <div className="min-h-0 max-h-[60dvh] overflow-y-auto whitespace-pre-wrap pr-2 text-sm text-foreground">
             {item.description}
           </div>
           <DialogFooter>
