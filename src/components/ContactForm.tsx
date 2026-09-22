@@ -24,7 +24,10 @@ import { checkRateLimit } from '@/lib/utils'
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  phone: z.string().regex(/^(\+260|0)?[79]\d{8}$/, 'Please enter a valid Zambian phone number'),
+  phone: z
+    .string()
+    .min(7, 'Please enter a valid phone number')
+    .refine((value) => value.replace(/\D/g, '').length >= 7, 'Please enter a valid phone number'),
   company: z.string().optional(),
   service: z.string().min(1, 'Please select a service'),
   message: z.string().min(10, 'Message must be at least 10 characters'),
@@ -40,6 +43,7 @@ type ContactFormData = z.infer<typeof contactFormSchema>
  */
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('email')
   const { toast } = useToast()
 
   const {
@@ -79,25 +83,33 @@ export function ContactForm() {
     setIsSubmitting(true)
 
     try {
-      const subject = encodeURIComponent(`Website contact: ${data.service}`)
-      const body = encodeURIComponent(
-        [
-          `Name: ${data.name}`,
-          `Email: ${data.email}`,
-          `Phone: ${data.phone}`,
-          `Company: ${data.company || 'Not provided'}`,
-          `Service Interest: ${data.service}`,
-          '',
-          data.message,
-        ].join('\n')
-      )
-      window.location.href = `mailto:rubexydesigns@gmail.com?subject=${subject}&body=${body}`
+      const message = [
+        `Name: ${data.name}`,
+        `Email: ${data.email}`,
+        `Phone: ${data.phone}`,
+        `Company: ${data.company || 'Not provided'}`,
+        `Service Interest: ${data.service}`,
+        '',
+        data.message,
+      ].join('\n')
 
-      // Success
-      toast({
-        title: 'Email draft opened',
-        description: 'Please send the email from your mail app to complete your enquiry.',
-      })
+      if (deliveryMethod === 'whatsapp') {
+        const whatsappNumber = '260972188566'
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+        toast({
+          title: 'WhatsApp opened',
+          description: 'Your enquiry has been pre-filled in WhatsApp.',
+        })
+      } else {
+        const subject = encodeURIComponent(`Website contact: ${data.service}`)
+        const body = encodeURIComponent(message)
+        window.location.href = `mailto:rubexydesigns@gmail.com?subject=${subject}&body=${body}`
+        toast({
+          title: 'Email draft opened',
+          description: 'Please send the email from your mail app to complete your enquiry.',
+        })
+      }
 
       reset()
     } catch (error) {
@@ -235,17 +247,37 @@ export function ContactForm() {
         autoComplete="off"
       />
 
-      {/* Submit button */}
-      <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          'Send Message'
-        )}
-      </Button>
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={deliveryMethod === 'email' ? 'default' : 'outline'}
+            onClick={() => setDeliveryMethod('email')}
+          >
+            Email
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={deliveryMethod === 'whatsapp' ? 'default' : 'outline'}
+            onClick={() => setDeliveryMethod('whatsapp')}
+          >
+            WhatsApp
+          </Button>
+        </div>
+
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            'Send Message'
+          )}
+        </Button>
+      </div>
     </form>
   )
 }

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Eye } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { EditText } from '@/components/EditText'
 import { Button } from '@/components/ui/button'
 
@@ -84,13 +84,7 @@ export function Hero() {
           </div>
 
           {/* CTA buttons */}
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Button asChild size="lg" className="gap-2 bg-orange-500 hover:bg-orange-600 text-white font-brand">
-              <Link to="/rfq">
-                Get a Quote
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+          <div className="mt-10 flex justify-center">
             <Button asChild variant="outline" size="lg" className="gap-2 border-white text-white hover:bg-white hover:text-gray-900 font-brand">
               <Link to="/portfolio">
                 <Eye className="h-4 w-4" />

@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
@@ -141,6 +141,35 @@ export function LogoWall() {
     }
   }
 
+  async function handleDeleteClient(clientId: string) {
+    const confirmed = window.confirm('Delete this client card?')
+
+    if (!confirmed) {
+      return
+    }
+
+    setError(null)
+
+    try {
+      const keys = [
+        `companyprofile.clients.logo.${clientId}`,
+        `companyprofile.clients.name.${clientId}`,
+        `companyprofile.clients.description.${clientId}`,
+      ]
+
+      const { error: deleteError } = await supabase.from('site_content').delete().in('key', keys)
+
+      if (deleteError) {
+        throw deleteError
+      }
+
+      setLogos((currentLogos) => currentLogos.filter((logo) => logo.id !== clientId))
+      queryClient.invalidateQueries({ queryKey: ['site-content'] })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete client.')
+    }
+  }
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -216,7 +245,7 @@ export function LogoWall() {
 
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6">
           {logos.map((logo) => (
-            <ClientCard key={logo.id} logo={logo} />
+            <ClientCard key={logo.id} logo={logo} onDelete={handleDeleteClient} />
           ))}
         </div>
 
@@ -232,7 +261,14 @@ export function LogoWall() {
   )
 }
 
-function ClientCard({ logo }: { logo: { id: string; name: string; description: string } }) {
+function ClientCard({
+  logo,
+  onDelete,
+}: {
+  logo: { id: string; name: string; description: string }
+  onDelete: (clientId: string) => void
+}) {
+  const { isAdmin } = useAuth()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const logoSrc = useContentValue(`companyprofile.clients.logo.${logo.id}`, '')
   const name = useContentValue(`companyprofile.clients.name.${logo.id}`, logo.name)
@@ -256,7 +292,19 @@ function ClientCard({ logo }: { logo: { id: string; name: string; description: s
   }
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-6 transition-all hover:shadow-md">
+    <div className="relative flex flex-col items-center justify-center rounded-lg border bg-card p-6 transition-all hover:shadow-md">
+      {isAdmin && (
+        <button
+          type="button"
+          onClick={() => onDelete(logo.id)}
+          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-red-200 hover:text-red-600"
+          aria-label={`Delete ${name}`}
+          title="Delete client"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
+
       {/* Image carousel */}
       <div className="mb-4 relative h-20 w-20 overflow-hidden rounded-full bg-slate-100 border border-slate-200 shadow-sm flex items-center justify-center group">
         {images.length > 0 ? (

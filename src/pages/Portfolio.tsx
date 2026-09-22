@@ -1,3 +1,4 @@
+import { EditText } from '@/components/EditText'
 import { PortfolioAdminForm } from '@/components/PortfolioAdminForm'
 import { PortfolioGrid } from '@/components/PortfolioGrid'
 import { SEO } from '@/components/SEO'
@@ -23,9 +24,19 @@ export function Portfolio() {
         <section className="bg-gradient-to-b from-primary/5 to-background py-20">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-3xl text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Portfolio</h1>
+              <h1 className="mb-6 text-4xl font-bold md:text-5xl">
+                <EditText
+                  contentKey="portfolio.hero.title"
+                  fallback="Our Portfolio"
+                  render={(value) => <span>{value}</span>}
+                />
+              </h1>
               <p className="text-xl text-muted-foreground">
-                Explore our work across branding, print, and media projects
+                <EditText
+                  contentKey="portfolio.hero.subtitle"
+                  fallback="Explore our work across branding, print, and media projects"
+                  render={(value) => <span>{value}</span>}
+                />
               </p>
             </div>
           </div>

@@ -7,13 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { useToast } from '@/components/ui/use-toast'
 import { checkRateLimit } from '@/lib/utils'
 
@@ -24,12 +17,12 @@ import { checkRateLimit } from '@/lib/utils'
 const rfqFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  phone: z.string().regex(/^(\+260|0)?[79]\d{8}$/, 'Please enter a valid Zambian phone number'),
-  company: z.string().min(2, 'Company name is required'),
-  service: z.string().min(1, 'Please select a service'),
-  quantity: z.string().min(1, 'Quantity is required'),
+  phone: z
+    .string()
+    .min(7, 'Please enter a valid phone number')
+    .refine((value) => value.replace(/\D/g, '').length >= 7, 'Please enter a valid phone number'),
   deadline: z.string().optional(),
-  specifications: z.string().min(20, 'Please provide detailed specifications (minimum 20 characters)'),
+  specifications: z.string().optional(),
   // Honeypot field
   website: z.string().optional(),
 })
@@ -43,20 +36,17 @@ type RFQFormData = z.infer<typeof rfqFormSchema>
 export function RFQForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('email')
   const { toast } = useToast()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
     reset,
   } = useForm<RFQFormData>({
     resolver: zodResolver(rfqFormSchema),
   })
-
-  const serviceValue = watch('service')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -98,29 +88,35 @@ export function RFQForm() {
     setIsSubmitting(true)
 
     try {
-      const subject = encodeURIComponent(`Quote request: ${data.service} - ${data.company}`)
-      const body = encodeURIComponent(
-        [
-          `Name: ${data.name}`,
-          `Email: ${data.email}`,
-          `Phone: ${data.phone}`,
-          `Company: ${data.company}`,
-          `Service: ${data.service}`,
-          `Quantity: ${data.quantity}`,
-          `Deadline: ${data.deadline || 'Not specified'}`,
-          selectedFile ? `Attachment to add manually: ${selectedFile.name}` : 'Attachment: none',
-          '',
-          data.specifications,
-        ].join('\n')
-      )
-      window.location.href = `mailto:rubexydesigns@gmail.com?subject=${subject}&body=${body}`
+      const message = [
+        `Name: ${data.name}`,
+        `Email: ${data.email}`,
+        `Phone: ${data.phone}`,
+        `Deadline: ${data.deadline || 'Not specified'}`,
+        selectedFile ? `Attachment to add manually: ${selectedFile.name}` : 'Attachment: none',
+        '',
+        data.specifications || 'No project specifications provided.',
+      ].join('\n')
 
-      toast({
-        title: 'Email draft opened',
-        description: selectedFile
-          ? 'Please attach your selected file before sending the email.'
-          : 'Please send the email from your mail app to complete your quote request.',
-      })
+      if (deliveryMethod === 'whatsapp') {
+        const whatsappNumber = '260972188566'
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+        toast({
+          title: 'WhatsApp opened',
+          description: 'Your quote request has been pre-filled in WhatsApp.',
+        })
+      } else {
+        const subject = encodeURIComponent('Quote request')
+        const body = encodeURIComponent(message)
+        window.location.href = `mailto:rubexydesigns@gmail.com?subject=${subject}&body=${body}`
+        toast({
+          title: 'Email draft opened',
+          description: selectedFile
+            ? 'Please attach your selected file before sending the email.'
+            : 'Please send the email from your mail app to complete your quote request.',
+        })
+      }
 
       reset()
       setSelectedFile(null)
@@ -183,59 +179,6 @@ export function RFQForm() {
           )}
         </div>
 
-        {/* Company */}
-        <div className="space-y-2">
-          <Label htmlFor="rfq-company">Company *</Label>
-          <Input
-            id="rfq-company"
-            {...register('company')}
-            placeholder="Your Company"
-            aria-invalid={errors.company ? 'true' : 'false'}
-          />
-          {errors.company && (
-            <p className="text-sm text-destructive">{errors.company.message}</p>
-          )}
-        </div>
-
-        {/* Service */}
-        <div className="space-y-2">
-          <Label htmlFor="rfq-service">Service *</Label>
-          <Select
-            value={serviceValue}
-            onValueChange={(value) => setValue('service', value)}
-          >
-            <SelectTrigger id="rfq-service" aria-invalid={errors.service ? 'true' : 'false'}>
-              <SelectValue placeholder="Select a service" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="printing">Printing (Books, Magazines, etc.)</SelectItem>
-              <SelectItem value="branding">Branding & Signage</SelectItem>
-              <SelectItem value="corporate-wear">Corporate Wear</SelectItem>
-              <SelectItem value="vehicle-branding">Vehicle Branding</SelectItem>
-              <SelectItem value="large-format">Large Format (Billboards, Banners)</SelectItem>
-              <SelectItem value="photography">Photography</SelectItem>
-              <SelectItem value="videography">Videography & Documentaries</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.service && (
-            <p className="text-sm text-destructive">{errors.service.message}</p>
-          )}
-        </div>
-
-        {/* Quantity */}
-        <div className="space-y-2">
-          <Label htmlFor="rfq-quantity">Quantity *</Label>
-          <Input
-            id="rfq-quantity"
-            {...register('quantity')}
-            placeholder="e.g., 100 pieces"
-            aria-invalid={errors.quantity ? 'true' : 'false'}
-          />
-          {errors.quantity && (
-            <p className="text-sm text-destructive">{errors.quantity.message}</p>
-          )}
-        </div>
-
         {/* Deadline */}
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="rfq-deadline">Deadline (optional)</Label>
@@ -249,7 +192,7 @@ export function RFQForm() {
 
       {/* Specifications */}
       <div className="space-y-2">
-        <Label htmlFor="rfq-specifications">Project Specifications *</Label>
+        <Label htmlFor="rfq-specifications">Project Specifications</Label>
         <Textarea
           id="rfq-specifications"
           {...register('specifications')}
@@ -293,20 +236,40 @@ export function RFQForm() {
         autoComplete="off"
       />
 
-      {/* Submit */}
-      <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Submitting...
-          </>
-        ) : (
-          <>
-            <Upload className="mr-2 h-4 w-4" />
-            Submit Quote Request
-          </>
-        )}
-      </Button>
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={deliveryMethod === 'email' ? 'default' : 'outline'}
+            onClick={() => setDeliveryMethod('email')}
+          >
+            Email
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={deliveryMethod === 'whatsapp' ? 'default' : 'outline'}
+            onClick={() => setDeliveryMethod('whatsapp')}
+          >
+            WhatsApp
+          </Button>
+        </div>
+
+        <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Submit Quote Request
+            </>
+          )}
+        </Button>
+      </div>
     </form>
   )
 }
