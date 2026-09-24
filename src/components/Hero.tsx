@@ -1,7 +1,4 @@
-import { Link } from 'react-router-dom'
-import { Eye } from 'lucide-react'
 import { EditText } from '@/components/EditText'
-import { Button } from '@/components/ui/button'
 
 const heroTitleFallback = 'Creativity Unlimited'
 const heroSubtitleFallback =
@@ -81,16 +78,6 @@ export function Hero() {
                 )}
               />
             </div>
-          </div>
-
-          {/* CTA buttons */}
-          <div className="mt-10 flex justify-center">
-            <Button asChild variant="outline" size="lg" className="gap-2 border-white text-white hover:bg-white hover:text-gray-900 font-brand">
-              <Link to="/portfolio">
-                <Eye className="h-4 w-4" />
-                See Portfolio
-              </Link>
-            </Button>
           </div>
 
           {/* Service clusters */}

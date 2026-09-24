@@ -1,11 +1,130 @@
-import { Building, Users, Award, Heart, Target, Eye, Shield, FileCheck } from 'lucide-react'
+import { useState } from 'react'
+import { Building, Users, Award, Heart, Target, Eye, Shield, FileCheck, ChevronLeft, ChevronRight } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LogoWall } from '@/components/LogoWall'
 import { Testimonial } from '@/components/Testimonial'
 import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
+import { useAuth } from '@/contexts/AuthContext'
 import { useContentValue } from '@/hooks/useSiteContent'
+
+function CompanyProfileGallery() {
+  const { isAdmin } = useAuth()
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  const image1 = useContentValue('companyprofile.gallery.image1', '')
+  const image2 = useContentValue('companyprofile.gallery.image2', '')
+  const image3 = useContentValue('companyprofile.gallery.image3', '')
+  const image4 = useContentValue('companyprofile.gallery.image4', '')
+
+  const validImages = [image1, image2, image3, image4].filter(Boolean)
+
+  const goToPrevious = () => {
+    if (validImages.length <= 1) return
+    setActiveIndex((current) => (current === 0 ? validImages.length - 1 : current - 1))
+  }
+
+  const goToNext = () => {
+    if (validImages.length <= 1) return
+    setActiveIndex((current) => (current === validImages.length - 1 ? 0 : current + 1))
+  }
+
+  return (
+    <section className="py-16 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="mx-auto max-w-5xl">
+          <Card className="overflow-hidden border-2 border-orange-200 bg-white">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <Heart className="h-8 w-8 text-orange-500" />
+                <EditText
+                  contentKey="companyprofile.gallery.title"
+                  fallback="Community Highlights"
+                  render={(value) => (
+                    <CardTitle className="text-2xl text-gray-800">{value}</CardTitle>
+                  )}
+                />
+              </div>
+            </CardHeader>
+
+            <CardContent className="pb-6">
+              {validImages.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="relative overflow-hidden rounded-2xl border border-orange-100 bg-white">
+                    <img
+                      src={validImages[activeIndex]}
+                      alt="Company profile gallery"
+                      className="h-[420px] w-full object-cover"
+                    />
+
+                    {validImages.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Previous image"
+                          onClick={goToPrevious}
+                          className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Next image"
+                          onClick={goToNext}
+                          className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {validImages.length > 1 && (
+                    <div className="flex justify-center gap-2">
+                      {validImages.map((_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          aria-label={`Go to slide ${index + 1}`}
+                          onClick={() => setActiveIndex(index)}
+                          className={`h-2.5 w-2.5 rounded-full transition ${
+                            index === activeIndex ? 'bg-orange-500' : 'bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center text-gray-500">
+                  No gallery images uploaded yet.
+                </div>
+              )}
+
+              {isAdmin && (
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  {[
+                    'companyprofile.gallery.image1',
+                    'companyprofile.gallery.image2',
+                    'companyprofile.gallery.image3',
+                    'companyprofile.gallery.image4',
+                  ].map((key, index) => (
+                    <UploadImage
+                      key={key}
+                      contentKey={key}
+                      label={`Upload image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 /**
  * Company Profile page component
@@ -466,6 +585,8 @@ export function CompanyProfile() {
             </div>
           </div>
         </section>
+
+        <CompanyProfileGallery />
 
         {/* CSR Section */}
         <section className="py-16 bg-white" id="csr">
