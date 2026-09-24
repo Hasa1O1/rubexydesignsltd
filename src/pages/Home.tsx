@@ -1,9 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Hero } from '@/components/Hero'
-import { ComplianceStrip } from '@/components/ComplianceStrip'
 import { PortfolioGrid } from '@/components/PortfolioGrid'
 import { Button } from '@/components/ui/button'
-import { Heart } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { usePortfolioItems } from '@/hooks/usePortfolioItems'
 import { EditText } from '@/components/EditText'
@@ -56,36 +54,6 @@ export function Home() {
               <Button asChild size="lg" variant="outline">
                 <Link to="/portfolio">View All Projects</Link>
               </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Compliance badges */}
-        <ComplianceStrip />
-
-        {/* CSR Section */}
-        <section className="py-16 bg-orange-50">
-          <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-3xl text-center">
-              <Heart className="h-12 w-12 text-orange-500 mx-auto mb-4" aria-hidden="true" />
-              <EditText
-                contentKey="home.csr.title"
-                fallback="Corporate Social Responsibility"
-                render={(value) => (
-                  <h2 className="text-3xl font-bold mb-4 text-gray-800 font-brand">
-                    {value}
-                  </h2>
-                )}
-              />
-              <EditText
-                contentKey="home.csr.description"
-                fallback="Proud media partner in cancer-awareness initiatives supporting Breakthrough Cancer Trust. We believe in using our skills to make a positive impact in our community."
-                render={(value) => (
-                  <p className="text-gray-700 font-brand">
-                    {value}
-                  </p>
-                )}
-              />
             </div>
           </div>
         </section>
