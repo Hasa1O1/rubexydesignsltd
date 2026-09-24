@@ -37,18 +37,15 @@ function AboutImageSlider() {
         <div className="mx-auto max-w-5xl">
           <Card className="border-2 border-primary/20 overflow-hidden">
             <CardHeader className="pb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Heart className="h-8 w-8 text-primary" aria-hidden="true" />
-                <EditText
-                  contentKey="about.csr.title"
-                  fallback="Community & Impact"
-                  render={(value) => (
-                    <CardTitle className="text-2xl">
-                      {value}
-                    </CardTitle>
-                  )}
-                />
-              </div>
+              <EditText
+                contentKey="about.csr.title"
+                fallback="Community & Impact"
+                render={(value) => (
+                  <CardTitle className="text-2xl">
+                    {value}
+                  </CardTitle>
+                )}
+              />
             </CardHeader>
 
             <CardContent className="pb-6">
@@ -58,7 +55,8 @@ function AboutImageSlider() {
                     <img
                       src={validImages[activeIndex]}
                       alt="About gallery"
-                      className="h-[420px] w-full object-cover"
+                      className="h-[480px] w-full object-cover object-center"
+                      style={{ aspectRatio: '3 / 4' }}
                     />
 
                     {validImages.length > 1 && (

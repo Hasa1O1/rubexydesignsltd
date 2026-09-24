@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { 
   Printer, 
   Palette, 
@@ -6,7 +7,9 @@ import {
   Camera, 
   Video,
   FileText,
-  Award 
+  Award,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ServiceCard } from '@/components/ServiceCard'
@@ -14,7 +17,117 @@ import { Button } from '@/components/ui/button'
 import { SEO } from '@/components/SEO'
 import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
+import { useAuth } from '@/contexts/AuthContext'
 import { useContentValue } from '@/hooks/useSiteContent'
+
+function ServiceGallery({
+  titleKey,
+  fallbackTitle,
+  imageKeys,
+}: {
+  titleKey: string
+  fallbackTitle: string
+  imageKeys: string[]
+}) {
+  const { isAdmin } = useAuth()
+  const [activeIndex, setActiveIndex] = useState(0)
+  const imageValues = imageKeys.map((key) => useContentValue(key, ''))
+  const validImages = imageValues.filter(Boolean)
+
+  const goToPrevious = () => {
+    if (validImages.length <= 1) return
+    setActiveIndex((current) => (current === 0 ? validImages.length - 1 : current - 1))
+  }
+
+  const goToNext = () => {
+    if (validImages.length <= 1) return
+    setActiveIndex((current) => (current === validImages.length - 1 ? 0 : current + 1))
+  }
+
+  return (
+    <section className="pb-16">
+      <div className="container mx-auto px-4">
+        <div className="mx-auto max-w-5xl rounded-[28px] border border-orange-100 bg-white p-5 shadow-[0_18px_35px_rgba(15,23,42,0.04)] md:p-8">
+          <div className="mb-6 text-center">
+            <EditText
+              contentKey={titleKey}
+              fallback={fallbackTitle}
+              render={(value) => (
+                <h3 className="text-2xl font-bold text-gray-800 md:text-3xl">{value}</h3>
+              )}
+            />
+          </div>
+
+          {validImages.length > 0 ? (
+            <div className="space-y-4">
+              <div className="relative overflow-hidden rounded-2xl border border-orange-100 bg-slate-100">
+                <img
+                  src={validImages[activeIndex]}
+                  alt="Service gallery"
+                  className="h-[480px] w-full object-cover object-center md:h-[560px]"
+                  style={{ aspectRatio: '3 / 4' }}
+                />
+
+                {validImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous service image"
+                      onClick={goToPrevious}
+                      className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next service image"
+                      onClick={goToNext}
+                      className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {validImages.length > 1 && (
+                <div className="flex justify-center gap-2">
+                  {validImages.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      aria-label={`Go to slide ${index + 1}`}
+                      onClick={() => setActiveIndex(index)}
+                      className={`h-2.5 w-2.5 rounded-full transition ${
+                        index === activeIndex ? 'bg-primary' : 'bg-slate-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
+              No gallery images uploaded yet.
+            </div>
+          )}
+
+          {isAdmin && (
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {imageKeys.map((key, index) => (
+                <UploadImage
+                  key={key}
+                  contentKey={key}
+                  label={`Upload image ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 /**
  * Services page component
@@ -264,6 +377,17 @@ export function Services() {
           </div>
         </section>
 
+        <ServiceGallery
+          titleKey="services.print.gallery.title"
+          fallbackTitle="Print Work Gallery"
+          imageKeys={[
+            'services.print.gallery.image1',
+            'services.print.gallery.image2',
+            'services.print.gallery.image3',
+            'services.print.gallery.image4',
+          ]}
+        />
+
         {/* Branding Services */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
@@ -300,6 +424,17 @@ export function Services() {
           </div>
         </section>
 
+        <ServiceGallery
+          titleKey="services.branding.gallery.title"
+          fallbackTitle="Branding In Action"
+          imageKeys={[
+            'services.branding.gallery.image1',
+            'services.branding.gallery.image2',
+            'services.branding.gallery.image3',
+            'services.branding.gallery.image4',
+          ]}
+        />
+
         {/* Media Services */}
         <section className="py-16">
           <div className="container mx-auto px-4">
@@ -335,6 +470,17 @@ export function Services() {
             </div>
           </div>
         </section>
+
+        <ServiceGallery
+          titleKey="services.media.gallery.title"
+          fallbackTitle="Media Production Highlights"
+          imageKeys={[
+            'services.media.gallery.image1',
+            'services.media.gallery.image2',
+            'services.media.gallery.image3',
+            'services.media.gallery.image4',
+          ]}
+        />
 
         {/* CTA */}
         <section className="py-20">

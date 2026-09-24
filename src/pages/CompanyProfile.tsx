@@ -36,16 +36,13 @@ function CompanyProfileGallery() {
         <div className="mx-auto max-w-5xl">
           <Card className="overflow-hidden border-2 border-orange-200 bg-white">
             <CardHeader className="pb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Heart className="h-8 w-8 text-orange-500" />
-                <EditText
-                  contentKey="companyprofile.gallery.title"
-                  fallback="Community Highlights"
-                  render={(value) => (
-                    <CardTitle className="text-2xl text-gray-800">{value}</CardTitle>
-                  )}
-                />
-              </div>
+              <EditText
+                contentKey="companyprofile.gallery.title"
+                fallback="Community Highlights"
+                render={(value) => (
+                  <CardTitle className="text-2xl text-gray-800">{value}</CardTitle>
+                )}
+              />
             </CardHeader>
 
             <CardContent className="pb-6">
@@ -55,7 +52,8 @@ function CompanyProfileGallery() {
                     <img
                       src={validImages[activeIndex]}
                       alt="Company profile gallery"
-                      className="h-[420px] w-full object-cover"
+                      className="h-[480px] w-full object-cover object-center"
+                      style={{ aspectRatio: '3 / 4' }}
                     />
 
                     {validImages.length > 1 && (
