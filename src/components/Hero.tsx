@@ -23,7 +23,7 @@ export function Hero() {
           <div className="w-full h-1 bg-orange-500 mb-8"></div>
 
           {/* Main heading */}
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-white font-brand mb-6">
+          <h1 className="reveal-up text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-white font-brand mb-6">
             <EditText
               contentKey="home.hero.title"
               fallback={heroTitleFallback}
@@ -42,7 +42,7 @@ export function Hero() {
           </h1>
 
           {/* Elevator pitch */}
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-300 md:text-xl font-brand leading-relaxed">
+          <p className="reveal-up reveal-up-delay-1 mx-auto mt-6 max-w-2xl text-lg text-gray-300 md:text-xl font-brand leading-relaxed">
             <EditText
               contentKey="home.hero.subtitle"
               fallback={heroSubtitleFallback}
@@ -82,7 +82,7 @@ export function Hero() {
 
           {/* Service clusters */}
           <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border-2 border-orange-200 bg-white/10 backdrop-blur p-6 text-left shadow-lg">
+            <div className="reveal-up reveal-up-delay-2 card-lift rounded-2xl border-2 border-orange-200/80 bg-white/10 backdrop-blur p-6 text-left shadow-lg shadow-orange-950/10">
               <EditText
                 contentKey="home.hero.cluster.print.title"
                 fallback="Print"
@@ -98,7 +98,7 @@ export function Hero() {
                 )}
               />
             </div>
-            <div className="rounded-2xl border-2 border-orange-200 bg-white/10 backdrop-blur p-6 text-left shadow-lg">
+            <div className="reveal-up reveal-up-delay-3 card-lift rounded-2xl border-2 border-orange-200/80 bg-white/10 backdrop-blur p-6 text-left shadow-lg shadow-orange-950/10">
               <EditText
                 contentKey="home.hero.cluster.brand.title"
                 fallback="Brand"
@@ -114,7 +114,7 @@ export function Hero() {
                 )}
               />
             </div>
-            <div className="rounded-2xl border-2 border-orange-200 bg-white/10 backdrop-blur p-6 text-left shadow-lg">
+            <div className="reveal-up reveal-up-delay-3 card-lift rounded-2xl border-2 border-orange-200/80 bg-white/10 backdrop-blur p-6 text-left shadow-lg shadow-orange-950/10">
               <EditText
                 contentKey="home.hero.cluster.media.title"
                 fallback="Media"

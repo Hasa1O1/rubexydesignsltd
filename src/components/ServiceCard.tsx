@@ -17,7 +17,7 @@ interface ServiceCardProps {
  */
 export function ServiceCard({ icon: Icon, title, description, items, contentKey, itemKeys }: ServiceCardProps) {
   return (
-    <Card className="h-full transition-shadow hover:shadow-lg">
+    <Card className="card-lift reveal-up h-full border border-orange-100/80 bg-white/85 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
       <CardHeader>
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
           <Icon className="h-6 w-6 text-primary" aria-hidden="true" />

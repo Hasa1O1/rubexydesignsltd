@@ -29,7 +29,7 @@ export function Home() {
         {/* Featured portfolio */}
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
+            <div className="reveal-up text-center mb-12">
               <EditText
                 contentKey="home.featured.title"
                 fallback="Featured Work"
@@ -49,9 +49,11 @@ export function Home() {
                 )}
               />
             </div>
-            <PortfolioGrid items={visibleFeaturedPortfolio} showFilters={false} />
-            <div className="text-center mt-12">
-              <Button asChild size="lg" variant="outline">
+            <div className="reveal-up reveal-up-delay-1">
+              <PortfolioGrid items={visibleFeaturedPortfolio} showFilters={false} />
+            </div>
+            <div className="reveal-up reveal-up-delay-2 text-center mt-12">
+              <Button asChild size="lg" variant="outline" className="transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                 <Link to="/portfolio">View All Projects</Link>
               </Button>
             </div>

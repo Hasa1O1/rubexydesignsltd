@@ -268,7 +268,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   }
 
   return (
-    <Card className="group relative h-[min(32rem,calc(100dvh-7rem))] max-h-[calc(100dvh-7rem)] min-h-0 overflow-hidden rounded-2xl border-0 bg-black text-white transition-shadow hover:shadow-xl">
+    <Card className="card-lift group relative h-[min(32rem,calc(100dvh-7rem))] max-h-[calc(100dvh-7rem)] min-h-0 overflow-hidden rounded-2xl border-0 bg-black text-white shadow-[0_18px_40px_rgba(15,23,42,0.14)]">
       {/* Image slider */}
       <div
         className="absolute inset-0 overflow-hidden bg-muted"
@@ -282,7 +282,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
             alt={`${item.title} - view ${index + 1}`}
             loading="lazy"
             className={cn(
-              'absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out',
+              'image-hover absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out',
               index === currentImage ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             )}
           />
