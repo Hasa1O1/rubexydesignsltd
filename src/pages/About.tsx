@@ -1,4 +1,4 @@
-import { Award, Target, Eye, Heart } from 'lucide-react'
+import { Target, Eye } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EditText } from '@/components/EditText'
@@ -418,7 +418,6 @@ export function About() {
               />
               <div className="grid gap-8 md:grid-cols-3">
                 <div>
-                  <Award className="h-12 w-12 text-primary mx-auto mb-4" aria-hidden="true" />
                   <EditText
                     contentKey="about.values.quality.title"
                     fallback="Quality"
@@ -439,7 +438,6 @@ export function About() {
                   />
                 </div>
                 <div>
-                  <Target className="h-12 w-12 text-primary mx-auto mb-4" aria-hidden="true" />
                   <EditText
                     contentKey="about.values.innovation.title"
                     fallback="Innovation"
@@ -460,7 +458,6 @@ export function About() {
                   />
                 </div>
                 <div>
-                  <Heart className="h-12 w-12 text-primary mx-auto mb-4" aria-hidden="true" />
                   <EditText
                     contentKey="about.values.partnership.title"
                     fallback="Partnership"
