@@ -29,17 +29,20 @@ interface ManagedCardSectionProps {
   cards: ManagedCardItem[]
   descriptionField: string
   addLabel: string
+  showImage?: boolean
 }
 
 function ManagedCard({
   card,
   prefix,
   descriptionField,
+  showImage = true,
   onDelete,
 }: {
   card: ManagedCardItem
   prefix: string
   descriptionField: string
+  showImage?: boolean
   onDelete: (id: string) => void
 }) {
   const { isAdmin } = useAuth()
@@ -59,13 +62,15 @@ function ManagedCard({
         </button>
       )}
 
-      <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-sm">
-        {image ? (
-          <img src={image} alt={card.title} className="h-full w-full object-cover" />
-        ) : (
-          <span className="px-2 text-xs font-medium text-slate-500">No image</span>
-        )}
-      </div>
+      {showImage && (
+        <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-sm">
+          {image ? (
+            <img src={image} alt={card.title} className="h-full w-full object-cover" />
+          ) : (
+            <span className="px-2 text-xs font-medium text-slate-500">No image</span>
+          )}
+        </div>
+      )}
 
       <EditText
         contentKey={`${prefix}.${card.id}.title`}
@@ -79,11 +84,13 @@ function ManagedCard({
         render={(value) => <p className="mt-2 text-gray-600">{value}</p>}
       />
 
-      <UploadImage
-        contentKey={`${prefix}.${card.id}.image`}
-        label="Upload image"
-        className="mt-4 justify-center"
-      />
+      {showImage && (
+        <UploadImage
+          contentKey={`${prefix}.${card.id}.image`}
+          label="Upload image"
+          className="mt-4 justify-center"
+        />
+      )}
     </div>
   )
 }
@@ -719,6 +726,7 @@ export function CompanyProfile() {
           description="The values that guide our work and client relationships"
           descriptionField="content"
           addLabel="Add value card"
+          showImage={false}
           cards={[
             { id: 'card1', title: 'Friendly Support Staff', description: 'Our team is approachable and always ready to help with your project needs.' },
             { id: 'card2', title: 'Highly Efficient', description: 'We deliver projects on time and within budget, every time.' },
@@ -726,6 +734,8 @@ export function CompanyProfile() {
             { id: 'card4', title: 'Very Professional', description: 'We maintain the highest standards of professionalism in all our work.' },
             { id: 'card5', title: 'Great & Impeccable', description: 'We strive for perfection in every project we undertake.' },
             { id: 'card6', title: 'Creativity Unlimited', description: 'Our motto drives us to push creative boundaries and deliver innovative solutions.' },
+            { id: 'card7', title: 'Reliable Partnership', description: 'We build dependable partnerships through clear communication and consistent delivery.' },
+            { id: 'card8', title: 'Purposeful Creativity', description: 'We combine thoughtful ideas with practical solutions that create lasting value.' },
           ]}
         />
 

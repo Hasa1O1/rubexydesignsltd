@@ -54,7 +54,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
 
           {images.length > 0 ? (
             <>
-              <div className="relative mx-auto h-[280px] w-full max-w-5xl overflow-hidden sm:h-[430px]">
+              <div className="relative mx-auto h-[520px] w-full max-w-7xl overflow-hidden sm:h-[900px]">
                 {images.map((src, index) => {
                   const offset = getOffset(index)
                   if (Math.abs(offset) > 2) return null
@@ -69,7 +69,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
                       className="absolute top-1/2 overflow-hidden rounded-xl border border-white bg-white p-0 shadow-[0_16px_28px_rgba(15,23,42,0.18)] transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-orange-400"
                       style={{
                         left: `calc(50% + ${offset * 16}vw)`,
-                        width: 'clamp(110px, 22vw, 300px)',
+                        width: 'clamp(440px, 72vw, 1040px)',
                         aspectRatio: '1 / 1',
                         opacity: Math.abs(offset) === 2 ? 0.72 : 1,
                         transform: `translate(-50%, -50%) scale(${isActive ? 1.16 : 0.9})`,
