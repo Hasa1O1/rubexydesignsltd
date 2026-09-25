@@ -89,7 +89,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
           {images.length > 0 ? (
             <>
               <div
-                className="relative mx-auto h-[500px] w-full max-w-6xl overflow-hidden sm:h-[460px]"
+                className="relative mx-auto h-[300px] w-full max-w-6xl overflow-hidden sm:h-[460px]"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
