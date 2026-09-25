@@ -259,6 +259,12 @@ export function Services() {
             'services.print.gallery.image2',
             'services.print.gallery.image3',
             'services.print.gallery.image4',
+            'services.print.gallery.image5',
+            'services.print.gallery.image6',
+            'services.print.gallery.image7',
+            'services.print.gallery.image8',
+            'services.print.gallery.image9',
+            'services.print.gallery.image10',
           ]}
         />
 
@@ -305,6 +311,12 @@ export function Services() {
             'services.branding.gallery.image2',
             'services.branding.gallery.image3',
             'services.branding.gallery.image4',
+            'services.branding.gallery.image5',
+            'services.branding.gallery.image6',
+            'services.branding.gallery.image7',
+            'services.branding.gallery.image8',
+            'services.branding.gallery.image9',
+            'services.branding.gallery.image10',
           ]}
         />
 
@@ -351,6 +363,12 @@ export function Services() {
             'services.media.gallery.image2',
             'services.media.gallery.image3',
             'services.media.gallery.image4',
+            'services.media.gallery.image5',
+            'services.media.gallery.image6',
+            'services.media.gallery.image7',
+            'services.media.gallery.image8',
+            'services.media.gallery.image9',
+            'services.media.gallery.image10',
           ]}
         />
 

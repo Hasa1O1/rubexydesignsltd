@@ -214,6 +214,12 @@ function CompanyProfileGallery() {
         'companyprofile.gallery.image2',
         'companyprofile.gallery.image3',
         'companyprofile.gallery.image4',
+        'companyprofile.gallery.image5',
+        'companyprofile.gallery.image6',
+        'companyprofile.gallery.image7',
+        'companyprofile.gallery.image8',
+        'companyprofile.gallery.image9',
+        'companyprofile.gallery.image10',
       ]}
       className="bg-gray-50"
     />

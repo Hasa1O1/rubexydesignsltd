@@ -17,7 +17,8 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
   const [activeIndex, setActiveIndex] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
   const touchStartX = useRef<number | null>(null)
-  const images = imageKeys.map((key) => useContentValue(key, '')).filter(Boolean)
+  const supportedImageKeys = imageKeys.slice(0, 10)
+  const images = supportedImageKeys.map((key) => useContentValue(key, '')).filter(Boolean)
 
   useEffect(() => {
     setActiveIndex((current) => (images.length ? Math.min(current, images.length - 1) : 0))
@@ -72,7 +73,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
           {images.length > 0 ? (
             <>
               <div
-                className="relative mx-auto h-[300px] w-full max-w-6xl overflow-hidden sm:h-[460px]"
+                className="relative mx-auto h-[500px] w-full max-w-6xl overflow-hidden sm:h-[460px]"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
@@ -87,10 +88,9 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
                       type="button"
                       onClick={() => setActiveIndex(index)}
                       aria-label={isActive ? `Current image ${index + 1}` : `View image ${index + 1}`}
-                      className="absolute top-1/2 overflow-hidden rounded-xl border border-white bg-white p-0 shadow-[0_16px_28px_rgba(15,23,42,0.18)] transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      className="absolute top-1/2 w-[clamp(220px,56vw,600px)] overflow-hidden rounded-xl border border-white bg-white p-0 shadow-[0_16px_28px_rgba(15,23,42,0.18)] transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-orange-400 sm:w-[clamp(110px,28vw,300px)]"
                       style={{
                         left: `calc(50% + ${offset * 16}vw)`,
-                        width: 'clamp(110px, 28vw, 300px)',
                         aspectRatio: '1 / 1',
                         opacity: Math.abs(offset) === 2 ? 0.72 : 1,
                         transform: `translate(-50%, -50%) scale(${isActive ? 1.16 : 0.9})`,
@@ -152,7 +152,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
 
           {isAdmin && (
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              {imageKeys.map((key, index) => (
+              {supportedImageKeys.map((key, index) => (
                 <UploadImage key={key} contentKey={key} label={`Upload image ${index + 1}`} />
               ))}
             </div>

@@ -181,6 +181,12 @@ export function Contact() {
             'contact.findus.image2',
             'contact.findus.image3',
             'contact.findus.image4',
+            'contact.findus.image5',
+            'contact.findus.image6',
+            'contact.findus.image7',
+            'contact.findus.image8',
+            'contact.findus.image9',
+            'contact.findus.image10',
           ]}
           className="bg-muted/30"
         />

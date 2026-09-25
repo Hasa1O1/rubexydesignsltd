@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { SEO } from '@/components/SEO'
 import { usePortfolioItems } from '@/hooks/usePortfolioItems'
 import { EditText } from '@/components/EditText'
+import { ImageCardSlider } from '@/components/ImageCardSlider'
 
 /**
  * Home page component
@@ -25,6 +26,24 @@ export function Home() {
       <main>
         {/* Hero section */}
         <Hero />
+
+        <ImageCardSlider
+          titleKey="home.featured.gallery.title"
+          fallbackTitle="Featured Gallery"
+          imageKeys={[
+            'home.featured.gallery.image1',
+            'home.featured.gallery.image2',
+            'home.featured.gallery.image3',
+            'home.featured.gallery.image4',
+            'home.featured.gallery.image5',
+            'home.featured.gallery.image6',
+            'home.featured.gallery.image7',
+            'home.featured.gallery.image8',
+            'home.featured.gallery.image9',
+            'home.featured.gallery.image10',
+          ]}
+          className="bg-muted/30"
+        />
 
         {/* Featured portfolio */}
         <section className="py-16 bg-background">

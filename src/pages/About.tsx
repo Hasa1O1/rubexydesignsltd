@@ -11,7 +11,18 @@ function AboutImageSlider() {
     <ImageCardSlider
       titleKey="about.csr.title"
       fallbackTitle="Community & Impact"
-      imageKeys={['about.gallery.image1', 'about.gallery.image2', 'about.gallery.image3', 'about.gallery.image4']}
+      imageKeys={[
+        'about.gallery.image1',
+        'about.gallery.image2',
+        'about.gallery.image3',
+        'about.gallery.image4',
+        'about.gallery.image5',
+        'about.gallery.image6',
+        'about.gallery.image7',
+        'about.gallery.image8',
+        'about.gallery.image9',
+        'about.gallery.image10',
+      ]}
       className="bg-muted/30"
     />
   )
