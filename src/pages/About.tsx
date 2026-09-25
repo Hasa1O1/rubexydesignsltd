@@ -1,124 +1,19 @@
-import { useState } from 'react'
-import { Award, Target, Eye, Heart, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Award, Target, Eye, Heart } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
-import { useAuth } from '@/contexts/AuthContext'
+import { ImageCardSlider } from '@/components/ImageCardSlider'
 import { useContentValue } from '@/hooks/useSiteContent'
 
 function AboutImageSlider() {
-  const { isAdmin } = useAuth()
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  const imageKeys = [
-    'about.gallery.image1',
-    'about.gallery.image2',
-    'about.gallery.image3',
-    'about.gallery.image4',
-  ]
-
-  const images = imageKeys.map((key) => useContentValue(key, ''))
-  const validImages = images.filter(Boolean)
-
-  const goToPrevious = () => {
-    if (validImages.length <= 1) return
-    setActiveIndex((current) => (current === 0 ? validImages.length - 1 : current - 1))
-  }
-
-  const goToNext = () => {
-    if (validImages.length <= 1) return
-    setActiveIndex((current) => (current === validImages.length - 1 ? 0 : current + 1))
-  }
-
   return (
-    <section className="py-16 bg-muted/30">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-5xl">
-          <Card className="border-2 border-primary/20 overflow-hidden">
-            <CardHeader className="pb-4">
-              <EditText
-                contentKey="about.csr.title"
-                fallback="Community & Impact"
-                render={(value) => (
-                  <CardTitle className="text-2xl">
-                    {value}
-                  </CardTitle>
-                )}
-              />
-            </CardHeader>
-
-            <CardContent className="pb-6">
-              {validImages.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-muted bg-white">
-                    <img
-                      src={validImages[activeIndex]}
-                      alt="About gallery"
-                      className="h-[480px] w-full object-cover object-center"
-                      style={{ aspectRatio: '3 / 4' }}
-                    />
-
-                    {validImages.length > 1 && (
-                      <>
-                        <button
-                          type="button"
-                          aria-label="Previous image"
-                          onClick={goToPrevious}
-                          className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Next image"
-                          onClick={goToNext}
-                          className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {validImages.length > 1 && (
-                    <div className="flex justify-center gap-2">
-                      {validImages.map((_, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          aria-label={`Go to slide ${index + 1}`}
-                          onClick={() => setActiveIndex(index)}
-                          className={`h-2.5 w-2.5 rounded-full transition ${
-                            index === activeIndex ? 'bg-primary' : 'bg-muted-foreground/40'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-muted-foreground/40 bg-white p-10 text-center text-muted-foreground">
-                  No gallery images uploaded yet.
-                </div>
-              )}
-
-              {isAdmin && (
-                <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  {imageKeys.map((key, index) => (
-                    <UploadImage
-                      key={key}
-                      contentKey={key}
-                      label={`Upload image ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </section>
+    <ImageCardSlider
+      titleKey="about.csr.title"
+      fallbackTitle="Community & Impact"
+      imageKeys={['about.gallery.image1', 'about.gallery.image2', 'about.gallery.image3', 'about.gallery.image4']}
+      className="bg-muted/30"
+    />
   )
 }
 

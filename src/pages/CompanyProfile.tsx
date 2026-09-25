@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { Building, Users, Award, Heart, Target, Eye, Shield, FileCheck, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FormEvent, useState } from 'react'
+import { Building, Award, Heart, Target, Eye, Shield, FileCheck, Plus, Trash2 } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { SEO } from '@/components/SEO'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LogoWall } from '@/components/LogoWall'
@@ -8,119 +9,207 @@ import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
 import { useAuth } from '@/contexts/AuthContext'
 import { useContentValue } from '@/hooks/useSiteContent'
+import { ImageCardSlider } from '@/components/ImageCardSlider'
+import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
-function CompanyProfileGallery() {
+interface ManagedCardItem {
+  id: string
+  title: string
+  description: string
+}
+
+interface ManagedCardSectionProps {
+  prefix: string
+  title: string
+  description: string
+  cards: ManagedCardItem[]
+  descriptionField: string
+  addLabel: string
+}
+
+function ManagedCard({
+  card,
+  prefix,
+  descriptionField,
+  onDelete,
+}: {
+  card: ManagedCardItem
+  prefix: string
+  descriptionField: string
+  onDelete: (id: string) => void
+}) {
   const { isAdmin } = useAuth()
-  const [activeIndex, setActiveIndex] = useState(0)
+  const image = useContentValue(`${prefix}.${card.id}.image`, '')
 
-  const image1 = useContentValue('companyprofile.gallery.image1', '')
-  const image2 = useContentValue('companyprofile.gallery.image2', '')
-  const image3 = useContentValue('companyprofile.gallery.image3', '')
-  const image4 = useContentValue('companyprofile.gallery.image4', '')
+  return (
+    <div className="relative flex h-full flex-col items-center justify-center rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
+      {isAdmin && (
+        <button
+          type="button"
+          onClick={() => onDelete(card.id)}
+          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-red-200 hover:text-red-600"
+          aria-label={`Delete ${card.title}`}
+          title="Delete card"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
 
-  const validImages = [image1, image2, image3, image4].filter(Boolean)
+      <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-sm">
+        {image ? (
+          <img src={image} alt={card.title} className="h-full w-full object-cover" />
+        ) : (
+          <span className="px-2 text-xs font-medium text-slate-500">No image</span>
+        )}
+      </div>
 
-  const goToPrevious = () => {
-    if (validImages.length <= 1) return
-    setActiveIndex((current) => (current === 0 ? validImages.length - 1 : current - 1))
+      <EditText
+        contentKey={`${prefix}.${card.id}.title`}
+        fallback={card.title}
+        render={(value) => <h3 className="text-xl font-bold text-gray-800">{value}</h3>}
+      />
+      <EditText
+        contentKey={`${prefix}.${card.id}.${descriptionField}`}
+        fallback={card.description}
+        multiline
+        render={(value) => <p className="mt-2 text-gray-600">{value}</p>}
+      />
+
+      <UploadImage
+        contentKey={`${prefix}.${card.id}.image`}
+        label="Upload image"
+        className="mt-4 justify-center"
+      />
+    </div>
+  )
+}
+
+function ManagedCardSection({ prefix, title, description, cards: initialCards, descriptionField, addLabel }: ManagedCardSectionProps) {
+  const { isAdmin } = useAuth()
+  const queryClient = useQueryClient()
+  const [cards, setCards] = useState(initialCards)
+  const [isOpen, setIsOpen] = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [newDescription, setNewDescription] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleAdd(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setIsSaving(true)
+    setError(null)
+
+    const id = `card-${Date.now()}`
+    const card = { id, title: newTitle.trim(), description: newDescription.trim() }
+
+    try {
+      const rows = [
+        { key: `${prefix}.${id}.title`, value: card.title, type: 'text' },
+        { key: `${prefix}.${id}.${descriptionField}`, value: card.description, type: 'text' },
+      ]
+      const { error: saveError } = await supabase.from('site_content').upsert(
+        rows.map((row) => ({ ...row, updated_at: new Date().toISOString() })),
+        { onConflict: 'key' },
+      )
+
+      if (saveError) throw saveError
+
+      setCards((currentCards) => [...currentCards, card])
+      setNewTitle('')
+      setNewDescription('')
+      setIsOpen(false)
+      await queryClient.invalidateQueries({ queryKey: ['site-content'] })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add card.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const goToNext = () => {
-    if (validImages.length <= 1) return
-    setActiveIndex((current) => (current === validImages.length - 1 ? 0 : current + 1))
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this card?')) return
+
+    const keys = [
+      `${prefix}.${id}.title`,
+      `${prefix}.${id}.${descriptionField}`,
+      `${prefix}.${id}.image`,
+    ]
+    const { error: deleteError } = await supabase.from('site_content').delete().in('key', keys)
+
+    if (deleteError) {
+      setError(deleteError.message)
+      return
+    }
+
+    setCards((currentCards) => currentCards.filter((card) => card.id !== id))
+    await queryClient.invalidateQueries({ queryKey: ['site-content'] })
   }
 
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-5xl">
-          <Card className="overflow-hidden border-2 border-orange-200 bg-white">
-            <CardHeader className="pb-4">
-              <EditText
-                contentKey="companyprofile.gallery.title"
-                fallback="Community Highlights"
-                render={(value) => (
-                  <CardTitle className="text-2xl text-gray-800">{value}</CardTitle>
-                )}
-              />
-            </CardHeader>
-
-            <CardContent className="pb-6">
-              {validImages.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-orange-100 bg-white">
-                    <img
-                      src={validImages[activeIndex]}
-                      alt="Company profile gallery"
-                      className="h-[480px] w-full object-cover object-center"
-                      style={{ aspectRatio: '3 / 4' }}
-                    />
-
-                    {validImages.length > 1 && (
-                      <>
-                        <button
-                          type="button"
-                          aria-label="Previous image"
-                          onClick={goToPrevious}
-                          className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Next image"
-                          onClick={goToNext}
-                          className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/45"
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {validImages.length > 1 && (
-                    <div className="flex justify-center gap-2">
-                      {validImages.map((_, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          aria-label={`Go to slide ${index + 1}`}
-                          onClick={() => setActiveIndex(index)}
-                          className={`h-2.5 w-2.5 rounded-full transition ${
-                            index === activeIndex ? 'bg-orange-500' : 'bg-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center text-gray-500">
-                  No gallery images uploaded yet.
-                </div>
-              )}
-
-              {isAdmin && (
-                <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  {[
-                    'companyprofile.gallery.image1',
-                    'companyprofile.gallery.image2',
-                    'companyprofile.gallery.image3',
-                    'companyprofile.gallery.image4',
-                  ].map((key, index) => (
-                    <UploadImage
-                      key={key}
-                      contentKey={key}
-                      label={`Upload image ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-gray-800">{title}</h2>
+          <p className="mt-2 text-gray-600">{description}</p>
         </div>
+
+        {isAdmin && (
+          <div className="mb-8 flex justify-center">
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2"><Plus className="h-4 w-4" />{addLabel}</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{addLabel}</DialogTitle>
+                  <DialogDescription>Add the card text, then upload its image from the card.</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleAdd} className="grid gap-4">
+                  <div>
+                    <Label htmlFor={`${prefix}-new-title`}>Title</Label>
+                    <Input id={`${prefix}-new-title`} value={newTitle} onChange={(event) => setNewTitle(event.target.value)} required />
+                  </div>
+                  <div>
+                    <Label htmlFor={`${prefix}-new-description`}>Description</Label>
+                    <Input id={`${prefix}-new-description`} value={newDescription} onChange={(event) => setNewDescription(event.target.value)} required />
+                  </div>
+                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  <DialogFooter>
+                    <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                    <Button type="submit" disabled={isSaving}>{isSaving ? 'Adding...' : 'Add card'}</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
+
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {cards.map((card) => <ManagedCard key={card.id} card={card} prefix={prefix} descriptionField={descriptionField} onDelete={handleDelete} />)}
+        </div>
+        {error && !isOpen && <p className="mt-4 text-center text-sm text-destructive">{error}</p>}
       </div>
     </section>
+  )
+}
+
+function CompanyProfileGallery() {
+  return (
+    <ImageCardSlider
+      titleKey="companyprofile.gallery.title"
+      fallbackTitle="Community Highlights"
+      imageKeys={[
+        'companyprofile.gallery.image1',
+        'companyprofile.gallery.image2',
+        'companyprofile.gallery.image3',
+        'companyprofile.gallery.image4',
+      ]}
+      className="bg-gray-50"
+    />
   )
 }
 
@@ -624,207 +713,32 @@ export function CompanyProfile() {
           </div>
         </section>
 
-        {/* Values Section */}
-        <section className="py-16 bg-gray-50" id="values">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <EditText
-                contentKey="companyprofile.values.title"
-                fallback="Why Choose Rubexy Designs Limited?"
-                render={(value) => (
-                  <h2 className="text-3xl font-bold text-gray-800 mb-4">{value}</h2>
-                )}
-              />
-            </div>
-            
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
-                    <Users className="h-8 w-8 text-white" />
-                  </div>
-                  <EditText
-                    contentKey="companyprofile.values.card1.title"
-                    fallback="Friendly Support Staff"
-                    render={(value) => (
-                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
-                    )}
-                  />
-                  <EditText
-                    contentKey="companyprofile.values.card1.content"
-                    fallback="Our team is approachable and always ready to help with your project needs."
-                    render={(value) => <p className="text-gray-600">{value}</p>}
-                  />
-                </CardContent>
-              </Card>
+        <ManagedCardSection
+          prefix="companyprofile.values"
+          title="Why Choose Rubexy Designs Limited?"
+          description="The values that guide our work and client relationships"
+          descriptionField="content"
+          addLabel="Add value card"
+          cards={[
+            { id: 'card1', title: 'Friendly Support Staff', description: 'Our team is approachable and always ready to help with your project needs.' },
+            { id: 'card2', title: 'Highly Efficient', description: 'We deliver projects on time and within budget, every time.' },
+            { id: 'card3', title: 'Client Oriented', description: 'Your success is our priority. We tailor solutions to your specific needs.' },
+            { id: 'card4', title: 'Very Professional', description: 'We maintain the highest standards of professionalism in all our work.' },
+            { id: 'card5', title: 'Great & Impeccable', description: 'We strive for perfection in every project we undertake.' },
+            { id: 'card6', title: 'Creativity Unlimited', description: 'Our motto drives us to push creative boundaries and deliver innovative solutions.' },
+          ]}
+        />
 
-              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
-                    <Award className="h-8 w-8 text-white" />
-                  </div>
-                  <EditText
-                    contentKey="companyprofile.values.card2.title"
-                    fallback="Highly Efficient"
-                    render={(value) => (
-                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
-                    )}
-                  />
-                  <EditText
-                    contentKey="companyprofile.values.card2.content"
-                    fallback="We deliver projects on time and within budget, every time."
-                    render={(value) => <p className="text-gray-600">{value}</p>}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
-                    <Target className="h-8 w-8 text-white" />
-                  </div>
-                  <EditText
-                    contentKey="companyprofile.values.card3.title"
-                    fallback="Client Oriented"
-                    render={(value) => (
-                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
-                    )}
-                  />
-                  <EditText
-                    contentKey="companyprofile.values.card3.content"
-                    fallback="Your success is our priority. We tailor solutions to your specific needs."
-                    render={(value) => <p className="text-gray-600">{value}</p>}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
-                    <Building className="h-8 w-8 text-white" />
-                  </div>
-                  <EditText
-                    contentKey="companyprofile.values.card4.title"
-                    fallback="Very Professional"
-                    render={(value) => (
-                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
-                    )}
-                  />
-                  <EditText
-                    contentKey="companyprofile.values.card4.content"
-                    fallback="We maintain the highest standards of professionalism in all our work."
-                    render={(value) => <p className="text-gray-600">{value}</p>}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
-                    <Award className="h-8 w-8 text-white" />
-                  </div>
-                  <EditText
-                    contentKey="companyprofile.values.card5.title"
-                    fallback="Great & Impeccable"
-                    render={(value) => (
-                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
-                    )}
-                  />
-                  <EditText
-                    contentKey="companyprofile.values.card5.content"
-                    fallback="We strive for perfection in every project we undertake."
-                    render={(value) => <p className="text-gray-600">{value}</p>}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
-                    <Heart className="h-8 w-8 text-white" />
-                  </div>
-                  <EditText
-                    contentKey="companyprofile.values.card6.title"
-                    fallback="Creativity Unlimited"
-                    render={(value) => (
-                      <h3 className="text-xl font-bold text-gray-800 mb-2">{value}</h3>
-                    )}
-                  />
-                  <EditText
-                    contentKey="companyprofile.values.card6.content"
-                    fallback="Our motto drives us to push creative boundaries and deliver innovative solutions."
-                    render={(value) => <p className="text-gray-600">{value}</p>}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Compliance & Certifications */}
-        <section className="py-16 bg-white" id="compliance">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <EditText
-                contentKey="companyprofile.compliance.title"
-                fallback="Compliance & Certifications"
-                render={(value) => (
-                  <h2 className="text-3xl font-bold text-gray-800 font-brand">{value}</h2>
-                )}
-              />
-              <EditText
-                contentKey="companyprofile.compliance.description"
-                fallback="Fully registered and compliant with all Zambian regulatory requirements"
-                render={(value) => (
-                  <p className="text-gray-600 mt-2 font-brand">{value}</p>
-                )}
-              />
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {certifications.map((cert) => {
-                const Icon = cert.icon
-                return (
-                  <Card key={cert.id} className="h-full rounded-lg border bg-card p-6 transition-all hover:shadow-md">
-                    <CardHeader className="p-0">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-orange-500 text-white shadow-sm">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg font-brand">
-                            <EditText
-                              contentKey={`companyprofile.compliance.${cert.id}.title`}
-                              fallback={cert.title}
-                              render={(value) => <>{value}</>}
-                            />
-                          </CardTitle>
-                          <p className="text-sm text-gray-500 font-brand">
-                            <EditText
-                              contentKey={`companyprofile.compliance.${cert.id}.subtitle`}
-                              fallback={cert.subtitle}
-                              render={(value) => <>{value}</>}
-                            />
-                          </p>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                )
-              })}
-            </div>
-
-            <div className="mt-12 max-w-3xl mx-auto text-center">
-              <EditText
-                contentKey="companyprofile.compliance.footer"
-                fallback="Copies of certificates can be provided to authorized parties upon request. We maintain privacy and security while remaining transparent with partners and clients."
-                render={(value) => (
-                  <p className="text-sm text-gray-500 font-brand">{value}</p>
-                )}
-              />
-            </div>
-          </div>
-        </section>
+        <div id="compliance">
+          <ManagedCardSection
+            prefix="companyprofile.compliance"
+            title="Compliance & Certifications"
+            description="Fully registered and compliant with all Zambian regulatory requirements"
+            descriptionField="subtitle"
+            addLabel="Add certification card"
+            cards={certifications.map(({ id, title, subtitle }) => ({ id, title, description: subtitle }))}
+          />
+        </div>
 
         {/* Clients & Testimonials */}
         <section className="py-16 bg-gray-50" id="clients">
