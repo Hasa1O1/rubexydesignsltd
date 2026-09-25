@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { TouchEvent, useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react'
 import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
@@ -16,6 +16,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
   const { isAdmin } = useAuth()
   const [activeIndex, setActiveIndex] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
+  const touchStartX = useRef<number | null>(null)
   const images = imageKeys.map((key) => useContentValue(key, '')).filter(Boolean)
 
   useEffect(() => {
@@ -30,6 +31,22 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
   const goToNext = () => {
     if (images.length <= 1) return
     setActiveIndex((current) => (current === images.length - 1 ? 0 : current + 1))
+  }
+
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null
+  }
+
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (touchStartX.current === null) return
+
+    const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX.current
+    const distance = touchEndX - touchStartX.current
+    touchStartX.current = null
+
+    if (Math.abs(distance) < 40) return
+    if (distance < 0) goToNext()
+    else goToPrevious()
   }
 
   const getOffset = (index: number) => {
@@ -54,7 +71,11 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
 
           {images.length > 0 ? (
             <>
-              <div className="relative mx-auto h-[520px] w-full max-w-7xl overflow-hidden sm:h-[900px]">
+              <div
+                className="relative mx-auto h-[300px] w-full max-w-6xl overflow-hidden sm:h-[460px]"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
                 {images.map((src, index) => {
                   const offset = getOffset(index)
                   if (Math.abs(offset) > 2) return null
@@ -69,7 +90,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
                       className="absolute top-1/2 overflow-hidden rounded-xl border border-white bg-white p-0 shadow-[0_16px_28px_rgba(15,23,42,0.18)] transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-orange-400"
                       style={{
                         left: `calc(50% + ${offset * 16}vw)`,
-                        width: 'clamp(440px, 72vw, 1040px)',
+                        width: 'clamp(110px, 28vw, 300px)',
                         aspectRatio: '1 / 1',
                         opacity: Math.abs(offset) === 2 ? 0.72 : 1,
                         transform: `translate(-50%, -50%) scale(${isActive ? 1.16 : 0.9})`,
