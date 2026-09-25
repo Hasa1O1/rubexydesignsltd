@@ -1,13 +1,3 @@
-import { 
-  Printer, 
-  Palette, 
-  Shirt, 
-  Car, 
-  Camera, 
-  Video,
-  FileText,
-  Award,
-} from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ServiceCard } from '@/components/ServiceCard'
 import { Button } from '@/components/ui/button'
@@ -29,7 +19,6 @@ export function Services() {
   const logoSrc = useContentValue('site.logo', '/RDL Logo Full Color.png')
   const printServices = [
     {
-      icon: Printer,
       title: 'Printing Services',
       description: 'Professional printing for all your business needs',
       contentKey: 'services.print.card.printing',
@@ -51,7 +40,6 @@ export function Services() {
       ],
     },
     {
-      icon: FileText,
       title: 'Publications & Reports',
       description: 'Premium publishing for corporate and marketing materials',
       contentKey: 'services.print.card.publications',
@@ -73,7 +61,6 @@ export function Services() {
       ],
     },
     {
-      icon: Award,
       title: 'Large Format Printing',
       description: 'High-impact displays for indoor and outdoor visibility',
       contentKey: 'services.print.card.largeFormat',
@@ -98,7 +85,6 @@ export function Services() {
 
   const brandingServices = [
     {
-      icon: Shirt,
       title: 'Corporate Wear',
       description: 'Professional uniforms and branded apparel',
       contentKey: 'services.branding.card.corporateWear',
@@ -120,7 +106,6 @@ export function Services() {
       ],
     },
     {
-      icon: Car,
       title: 'Vehicle Branding',
       description: 'Turn your fleet into mobile advertisements',
       contentKey: 'services.branding.card.vehicleBranding',
@@ -145,7 +130,6 @@ export function Services() {
 
   const mediaServices = [
     {
-      icon: Camera,
       title: 'Photography',
       description: 'Professional photography for every occasion',
       contentKey: 'services.media.card.photography',
@@ -167,7 +151,6 @@ export function Services() {
       ],
     },
     {
-      icon: Video,
       title: 'Videography & Documentaries',
       description: 'Tell your story through compelling video',
       contentKey: 'services.media.card.video',
@@ -237,8 +220,7 @@ export function Services() {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="mb-12 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 mb-4">
-                <Printer className="h-5 w-5 text-primary" aria-hidden="true" />
+              <div className="mb-4 inline-flex items-center rounded-full bg-primary/10 px-4 py-2">
                 <span className="text-sm font-medium text-primary">Print</span>
               </div>
               <EditText
@@ -284,8 +266,7 @@ export function Services() {
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="mb-12 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 mb-4">
-                <Palette className="h-5 w-5 text-primary" aria-hidden="true" />
+              <div className="mb-4 inline-flex items-center rounded-full bg-primary/10 px-4 py-2">
                 <span className="text-sm font-medium text-primary">Brand</span>
               </div>
               <EditText
@@ -331,8 +312,7 @@ export function Services() {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="mb-12 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 mb-4">
-                <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+              <div className="mb-4 inline-flex items-center rounded-full bg-primary/10 px-4 py-2">
                 <span className="text-sm font-medium text-primary">Media</span>
               </div>
               <EditText

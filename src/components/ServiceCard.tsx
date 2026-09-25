@@ -1,9 +1,7 @@
-import { LucideIcon } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { EditText } from '@/components/EditText'
 
 interface ServiceCardProps {
-  icon: LucideIcon
   title: string
   description: string
   items: string[]
@@ -15,13 +13,10 @@ interface ServiceCardProps {
  * Service card component to display individual services
  * Shows an icon, title, description, and list of service items
  */
-export function ServiceCard({ icon: Icon, title, description, items, contentKey, itemKeys }: ServiceCardProps) {
+export function ServiceCard({ title, description, items, contentKey, itemKeys }: ServiceCardProps) {
   return (
     <Card className="card-lift reveal-up h-full border border-orange-100/80 bg-white/85 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
       <CardHeader>
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
-        </div>
         <CardTitle>
           {contentKey ? (
             <EditText

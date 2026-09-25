@@ -4,6 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { SEO } from '@/components/SEO'
 import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
+import { ImageCardSlider } from '@/components/ImageCardSlider'
 import { useContentValue } from '@/hooks/useSiteContent'
 
 /**
@@ -172,29 +173,17 @@ export function Contact() {
           </div>
         </section>
 
-        {/* Map section */}
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-4xl">
-              <h2 className="text-2xl font-bold mb-6 text-center">Find Us</h2>
-              <div className="aspect-video rounded-2xl overflow-hidden border bg-muted">
-                {/* Google Maps embed - placeholder */}
-                <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                  <div className="text-center">
-                    <MapPin className="h-12 w-12 text-primary mx-auto mb-4" aria-hidden="true" />
-                    <p className="text-muted-foreground">
-                      FINDECO House, Floor 12<br />
-                      Lusaka, Zambia
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Map integration available in production
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <ImageCardSlider
+          titleKey="contact.findus.title"
+          fallbackTitle="Find Us"
+          imageKeys={[
+            'contact.findus.image1',
+            'contact.findus.image2',
+            'contact.findus.image3',
+            'contact.findus.image4',
+          ]}
+          className="bg-muted/30"
+        />
       </main>
     </>
   )
