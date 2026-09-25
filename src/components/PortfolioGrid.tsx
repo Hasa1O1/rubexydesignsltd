@@ -32,28 +32,86 @@ interface PortfolioGridProps {
  */
 export function PortfolioGrid({ items = [], showFilters = true }: PortfolioGridProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const filterRowRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   const categories = ['all', ...Array.from(new Set(items.map((item) => item.category)))]
   const filteredItems =
     selectedCategory === 'all' ? items : items.filter((item) => item.category === selectedCategory)
 
+  useEffect(() => {
+    const filterRow = filterRowRef.current
+    if (!filterRow) return
+
+    const updateScrollState = () => {
+      setCanScrollLeft(filterRow.scrollLeft > 0)
+      setCanScrollRight(filterRow.scrollLeft + filterRow.clientWidth < filterRow.scrollWidth - 1)
+    }
+
+    updateScrollState()
+    filterRow.addEventListener('scroll', updateScrollState, { passive: true })
+    window.addEventListener('resize', updateScrollState)
+
+    return () => {
+      filterRow.removeEventListener('scroll', updateScrollState)
+      window.removeEventListener('resize', updateScrollState)
+    }
+  }, [categories.length])
+
+  const scrollFilters = (direction: 'left' | 'right') => {
+    filterRowRef.current?.scrollBy({
+      left: direction === 'left' ? -220 : 220,
+      behavior: 'smooth',
+    })
+  }
+
   return (
     <div className="space-y-8">
       {/* Category filters */}
       {showFilters && (
-        <div className="flex flex-wrap gap-2 justify-center items-center">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => scrollFilters('left')}
+            disabled={!canScrollLeft}
+            aria-label="Scroll portfolio filters left"
+            title="Scroll filters left"
+            className="h-9 w-9 shrink-0 rounded-full"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <div
+            ref={filterRowRef}
+            className="flex min-w-0 flex-1 gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {categories.map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? 'default' : 'outline'}
                 onClick={() => setSelectedCategory(category)}
-                className="capitalize"
+                className="shrink-0 capitalize"
               >
                 {category}
               </Button>
             ))}
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => scrollFilters('right')}
+            disabled={!canScrollRight}
+            aria-label="Scroll portfolio filters right"
+            title="Scroll filters right"
+            className="h-9 w-9 shrink-0 rounded-full"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
