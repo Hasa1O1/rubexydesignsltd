@@ -1,9 +1,11 @@
-import { TouchEvent, useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react'
+import { MouseEvent, TouchEvent, useEffect, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight, Maximize2, Trash2, X } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { EditText } from '@/components/EditText'
 import { UploadImage } from '@/components/UploadImage'
 import { useContentValue } from '@/hooks/useSiteContent'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 
 interface ImageCardSliderProps {
   titleKey: string
@@ -14,11 +16,15 @@ interface ImageCardSliderProps {
 
 export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className = '' }: ImageCardSliderProps) {
   const { isAdmin } = useAuth()
+  const queryClient = useQueryClient()
   const [activeIndex, setActiveIndex] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
   const touchStartX = useRef<number | null>(null)
   const supportedImageKeys = imageKeys.slice(0, 10)
-  const images = supportedImageKeys.map((key) => useContentValue(key, '')).filter(Boolean)
+  const imageEntries = supportedImageKeys
+    .map((key) => ({ key, src: useContentValue(key, '') }))
+    .filter((entry) => Boolean(entry.src))
+  const images = imageEntries.map((entry) => entry.src)
 
   useEffect(() => {
     setActiveIndex((current) => (images.length ? Math.min(current, images.length - 1) : 0))
@@ -48,6 +54,16 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
     if (Math.abs(distance) < 40) return
     if (distance < 0) goToNext()
     else goToPrevious()
+  }
+
+  const deleteImage = async (event: MouseEvent<HTMLButtonElement>, key: string) => {
+    event.stopPropagation()
+    if (!window.confirm('Delete this gallery image?')) return
+
+    const { error } = await supabase.from('site_content').delete().eq('key', key)
+    if (error) return
+
+    await queryClient.invalidateQueries({ queryKey: ['site-content'] })
   }
 
   const getOffset = (index: number) => {
@@ -98,6 +114,19 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
                       }}
                     >
                       <img src={src} alt={`Gallery image ${index + 1}`} className="h-full w-full object-cover" />
+                      {isAdmin && (
+                        <span className="absolute right-2 top-2">
+                          <button
+                            type="button"
+                            aria-label={`Delete gallery image ${index + 1}`}
+                            title="Delete image"
+                            onClick={(event) => deleteImage(event, imageEntries[index].key)}
+                            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/80 bg-white/90 text-red-600 shadow-lg transition hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </span>
+                      )}
                     </button>
                   )
                 })}

@@ -1,10 +1,11 @@
 import { ChangeEvent, useRef, useState } from 'react'
-import { ImageUp } from 'lucide-react'
+import { Check, ImageUp, Trash2 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { useContentValue } from '@/hooks/useSiteContent'
 
 interface UploadImageProps {
   contentKey: string
@@ -17,7 +18,9 @@ export function UploadImage({ contentKey, label = 'Upload image', className }: U
   const { isAdmin } = useAuth()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const imageUrl = useContentValue(contentKey, '')
 
   if (!isAdmin) {
     return null
@@ -73,6 +76,24 @@ export function UploadImage({ contentKey, label = 'Upload image', className }: U
     await queryClient.invalidateQueries({ queryKey: ['site-content'] })
   }
 
+  async function handleDelete() {
+    if (!window.confirm('Delete this uploaded image?')) return
+
+    setIsDeleting(true)
+    setError(null)
+
+    const { error: deleteError } = await supabase.from('site_content').delete().eq('key', contentKey)
+
+    if (deleteError) {
+      setError(deleteError.message)
+      setIsDeleting(false)
+      return
+    }
+
+    await queryClient.invalidateQueries({ queryKey: ['site-content'] })
+    setIsDeleting(false)
+  }
+
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <input
@@ -88,11 +109,25 @@ export function UploadImage({ contentKey, label = 'Upload image', className }: U
         variant="secondary"
         className="gap-2 shadow-lg"
         onClick={() => fileInputRef.current?.click()}
-        disabled={isUploading}
+        disabled={isUploading || isDeleting}
       >
-        <ImageUp className="h-4 w-4" />
-        {isUploading ? 'Uploading...' : label}
+        {imageUrl ? <Check className="h-4 w-4 text-emerald-600" /> : <ImageUp className="h-4 w-4" />}
+        {isUploading ? 'Uploading...' : imageUrl ? 'Image uploaded' : label}
       </Button>
+      {imageUrl && (
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          className="h-9 w-9 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+          onClick={handleDelete}
+          disabled={isUploading || isDeleting}
+          aria-label="Delete uploaded image"
+          title="Delete uploaded image"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
       {error && <span className="text-xs text-destructive">{error}</span>}
     </span>
   )
