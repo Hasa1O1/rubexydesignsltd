@@ -638,9 +638,9 @@ export function CompanyProfile() {
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
                 <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <EditText
@@ -658,9 +658,9 @@ export function CompanyProfile() {
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
                 <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
                     <Award className="h-8 w-8 text-white" />
                   </div>
                   <EditText
@@ -678,9 +678,9 @@ export function CompanyProfile() {
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
                 <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
                     <Target className="h-8 w-8 text-white" />
                   </div>
                   <EditText
@@ -698,9 +698,9 @@ export function CompanyProfile() {
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
                 <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
                     <Building className="h-8 w-8 text-white" />
                   </div>
                   <EditText
@@ -718,9 +718,9 @@ export function CompanyProfile() {
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
                 <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
                     <Award className="h-8 w-8 text-white" />
                   </div>
                   <EditText
@@ -738,9 +738,9 @@ export function CompanyProfile() {
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              <Card className="h-full rounded-lg border bg-card p-6 text-center transition-all hover:shadow-md">
                 <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-orange-500 shadow-sm">
                     <Heart className="h-8 w-8 text-white" />
                   </div>
                   <EditText
@@ -785,10 +785,10 @@ export function CompanyProfile() {
               {certifications.map((cert) => {
                 const Icon = cert.icon
                 return (
-                  <Card key={cert.id} className="border-2 border-orange-200 hover:shadow-xl transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-lg">
+                  <Card key={cert.id} className="h-full rounded-lg border bg-card p-6 transition-all hover:shadow-md">
+                    <CardHeader className="p-0">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-orange-500 text-white shadow-sm">
                           <Icon className="h-6 w-6" />
                         </div>
                         <div>
