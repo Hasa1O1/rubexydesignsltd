@@ -78,7 +78,7 @@ export function ImageCardSlider({ titleKey, fallbackTitle, imageKeys, className 
     <section className={`py-16 ${className}`}>
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-7 text-center">
+          <div className="mb-2 text-center sm:mb-7">
             <EditText
               contentKey={titleKey}
               fallback={fallbackTitle}
